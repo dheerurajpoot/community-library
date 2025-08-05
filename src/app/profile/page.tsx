@@ -32,9 +32,6 @@ export default function ProfilePage() {
 		lastName: "",
 		phone: "",
 		address: "",
-		city: "",
-		state: "",
-		zipCode: "",
 	});
 
 	const getUser = async () => {
@@ -63,9 +60,6 @@ export default function ProfilePage() {
 				lastName: user.name.split(" ")[1] || "",
 				phone: user.phone || "",
 				address: user.address || "",
-				city: user.city || "",
-				state: user.state || "",
-				zipCode: user.zipCode || "",
 			});
 		}
 	}, [user]);
@@ -75,7 +69,7 @@ export default function ProfilePage() {
 		setLoading(true);
 
 		try {
-			await axios.put("/api/auth/me", formData);
+			await axios.put("/api/profile", formData);
 			setEditing(false);
 			toast("Profile updated successfully");
 		} catch (error) {
@@ -222,57 +216,6 @@ export default function ProfilePage() {
 													}
 													className='border-emerald-200 focus:border-emerald-500'
 												/>
-											</div>
-
-											<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-												<div className='space-y-2'>
-													<Label htmlFor='city'>
-														City
-													</Label>
-													<Input
-														id='city'
-														value={formData.city}
-														onChange={(e) =>
-															handleChange(
-																"city",
-																e.target.value
-															)
-														}
-														className='border-emerald-200 focus:border-emerald-500'
-													/>
-												</div>
-												<div className='space-y-2'>
-													<Label htmlFor='state'>
-														State
-													</Label>
-													<Input
-														id='state'
-														value={formData.state}
-														onChange={(e) =>
-															handleChange(
-																"state",
-																e.target.value
-															)
-														}
-														className='border-emerald-200 focus:border-emerald-500'
-													/>
-												</div>
-												<div className='space-y-2'>
-													<Label htmlFor='zipCode'>
-														Zip Code
-													</Label>
-													<Input
-														id='zipCode'
-														value={formData.zipCode}
-														onChange={(e) =>
-															handleChange(
-																"zipCode",
-																e.target.value
-															)
-														}
-														className='border-emerald-200 focus:border-emerald-500'
-													/>
-												</div>
 											</div>
 
 											<div className='flex gap-4 pt-4'>

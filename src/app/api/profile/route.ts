@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest) {
 			);
 		}
 
-		const { name, phone, address } = await request.json();
+		const { firstName, lastName, phone, address } = await request.json();
 
 		// Find user
 		let user = await User.findOne({ _id: decoded.userId });
@@ -34,18 +34,13 @@ export async function PUT(request: NextRequest) {
 
 		// Update user profile
 		user = {
-			...user,
-			name: name || user.name,
+			name: firstName + " " + lastName || user.name,
 			phone: phone || user.phone,
 			address: address || user.address,
-			updatedAt: new Date().toISOString(),
 		};
 
-		// Remove password from response
-		const { password, ...userWithoutPassword } = user;
-
 		return NextResponse.json({
-			userWithoutPassword,
+			user,
 			message: "Profile updated successfully",
 			success: true,
 		});
