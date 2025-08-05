@@ -1,67 +1,59 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { User, UpdateProfileRequest } from "@/models"
-import { verifyToken } from "@/lib/utils/auth"
-
-// In-memory storage (use database in production)
-const users: User[] = [
-  {
-    id: "1",
-    email: "demo@example.com",
-    password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm",
-    firstName: "Demo",
-    lastName: "User",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St",
-    city: "Demo City",
-    state: "DC",
-    zipCode: "12345",
-    isVerified: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-]
+import { type NextRequest, NextResponse } from "next/server";
+import User from "@/models/User";
+import { verifyToken } from "@/lib/utils";
+import { connectDb } from "@/lib/database";
 
 export async function PUT(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get("authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Authorization token required" }, { status: 401 })
-    }
+	await connectDb();
+	try {
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ message: "Authorization token required", success: false },
+				{ status: 401 }
+			);
+		}
+		const decoded = verifyToken(token.value);
+		if (!decoded) {
+			return NextResponse.json(
+				{ message: "Invalid or expired token", success: false },
+				{ status: 401 }
+			);
+		}
 
-    const token = authHeader.substring(7)
-    const decoded = verifyToken(token)
+		const { name, phone, address } = await request.json();
 
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
-    }
+		// Find user
+		let user = await User.findOne({ _id: decoded.userId });
+		if (!user) {
+			return NextResponse.json(
+				{ message: "User not found", success: false },
+				{ status: 404 }
+			);
+		}
 
-    const body: UpdateProfileRequest = await request.json()
+		// Update user profile
+		user = {
+			...user,
+			name: name || user.name,
+			phone: phone || user.phone,
+			address: address || user.address,
+			updatedAt: new Date().toISOString(),
+		};
 
-    // Find user
-    const userIndex = users.findIndex((u) => u.id === decoded.userId)
-    if (userIndex === -1) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
+		// Remove password from response
+		const { password, ...userWithoutPassword } = user;
 
-    // Update user profile
-    users[userIndex] = {
-      ...users[userIndex],
-      firstName: body.firstName || users[userIndex].firstName,
-      lastName: body.lastName || users[userIndex].lastName,
-      phone: body.phone || users[userIndex].phone,
-      address: body.address || users[userIndex].address,
-      city: body.city || users[userIndex].city,
-      state: body.state || users[userIndex].state,
-      zipCode: body.zipCode || users[userIndex].zipCode,
-      updatedAt: new Date().toISOString(),
-    }
-
-    // Remove password from response
-    const { password, ...userWithoutPassword } = users[userIndex]
-
-    return NextResponse.json(userWithoutPassword)
-  } catch (error) {
-    console.error("Update profile error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
+		return NextResponse.json({
+			userWithoutPassword,
+			message: "Profile updated successfully",
+			success: true,
+		});
+	} catch (error) {
+		console.error("Update profile error:", error);
+		return NextResponse.json(
+			{ message: "Internal server error", success: false },
+			{ status: 500 }
+		);
+	}
 }

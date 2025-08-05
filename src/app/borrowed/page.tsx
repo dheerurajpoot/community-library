@@ -12,13 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BookOpen, Calendar, User, MapPin, RotateCcw } from "lucide-react";
-import { getBorrowedBooks, returnBook } from "@/lib/api";
-import type { BorrowTransaction } from "@/lib/models";
 import Navigation from "@/components/navigation";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function BorrowedBooksPage() {
-	const [transactions, setTransactions] = useState<BorrowTransaction[]>([]);
+	const [transactions, setTransactions] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -27,8 +26,13 @@ export default function BorrowedBooksPage() {
 
 	const loadBorrowedBooks = async () => {
 		try {
-			const data = await getBorrowedBooks();
-			setTransactions(Array.isArray(data) ? data : []);
+			const res = await axios.get("/api/borrow");
+			console.log(res.data.transactions);
+			setTransactions(
+				Array.isArray(res.data.transactions)
+					? res.data.transactions
+					: []
+			);
 		} catch (error) {
 			console.error("Failed to load borrowed books:", error);
 			setTransactions([]);
@@ -39,7 +43,7 @@ export default function BorrowedBooksPage() {
 
 	const handleReturn = async (transactionId: string) => {
 		try {
-			await returnBook(transactionId);
+			await axios.put(`/api/borrow/${transactionId}/return`);
 			setTransactions(
 				transactions.map((t) =>
 					t.id === transactionId
@@ -126,7 +130,7 @@ export default function BorrowedBooksPage() {
 
 							return (
 								<Card
-									key={transaction.id}
+									key={transaction._id}
 									className='group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white/80 backdrop-blur-sm'>
 									<CardHeader className='pb-3'>
 										<div className='flex items-start justify-between'>
@@ -185,7 +189,7 @@ export default function BorrowedBooksPage() {
 											<div className='flex items-center gap-2 text-sm text-gray-600'>
 												<MapPin className='h-4 w-4' />
 												<span>
-													{transaction.book.location}
+													{transaction.book.address}
 												</span>
 											</div>
 											<div className='flex items-center gap-2 text-sm text-gray-600'>
@@ -214,7 +218,9 @@ export default function BorrowedBooksPage() {
 										{transaction.status === "borrowed" ? (
 											<Button
 												onClick={() =>
-													handleReturn(transaction.id)
+													handleReturn(
+														transaction._id
+													)
 												}
 												className='w-full bg-emerald-600 hover:bg-emerald-700'>
 												Mark as Returned

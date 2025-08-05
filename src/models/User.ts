@@ -46,32 +46,3 @@ const userSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.User || mongoose.model("User", userSchema);
-
-export interface LoginRequest {
-	email: string;
-	password: string;
-}
-
-export interface ForgotPasswordRequest {
-	email: string;
-}
-
-export interface ResetPasswordRequest {
-	token: string;
-	password: string;
-}
-
-export interface VerifyOTPRequest {
-	email: string;
-	otp: string;
-}
-
-export interface UpdateProfileRequest {
-	firstName: string;
-	lastName: string;
-	phone?: string;
-	address?: string;
-	city?: string;
-	state?: string;
-	zipCode?: string;
-}

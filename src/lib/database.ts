@@ -1,59 +1,25 @@
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+let isConnected: Connection | false = false;
 
-if (!MONGODB_URI) {
-	throw new Error(
-		"Please define the MONGODB_URI environment variable inside .env.local"
-	);
-}
-
-interface CachedConnection {
-	conn: typeof mongoose | null;
-	promise: Promise<typeof mongoose> | null;
-}
-
-interface GlobalWithMongoose {
-	mongoose?: CachedConnection;
-}
-
-let cached: CachedConnection = (global as GlobalWithMongoose).mongoose || {
-	conn: null,
-	promise: null,
-};
-
-if (!cached) {
-	cached = (global as GlobalWithMongoose).mongoose = {
-		conn: null,
-		promise: null,
-	};
-}
-
-export async function connectDB() {
-	if (cached.conn) {
-		return cached.conn;
+export const connectDb = async (): Promise<Connection> => {
+	if (isConnected) {
+		console.log("Database already connected!");
+		return isConnected;
 	}
-
-	if (!cached.promise) {
-		const opts = {
-			bufferCommands: false,
-		};
-
-		cached.promise = mongoose
-			.connect(MONGODB_URI, opts)
-			.then((mongoose) => {
-				return mongoose;
-			});
-	}
-
 	try {
-		cached.conn = await cached.promise;
-		console.log("MongoDB connected");
-	} catch (e) {
-		cached.promise = null;
-		console.log("MongoDB connection error:", e);
-		throw e;
-	}
+		if (!process.env.MONGODB_URI) {
+			throw new Error(
+				"MONGODB_URI is not defined in environment variables"
+			);
+		}
 
-	return cached.conn;
-}
+		const res = await mongoose.connect(process.env.MONGODB_URI!);
+		isConnected = res.connection;
+		console.log("Database connected successfully");
+		return isConnected;
+	} catch (error) {
+		console.error("Error connecting to database:", error);
+		throw error;
+	}
+};

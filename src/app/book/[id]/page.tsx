@@ -8,10 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, MapPin, Calendar, ArrowLeft, Heart } from "lucide-react";
-import { getBook, borrowBook } from "@/lib/api";
-import type { Book } from "@/lib/models";
+import { getBook } from "@/lib/api";
 import Navigation from "@/components/navigation";
 import { toast } from "sonner";
+import { Book } from "@/app/my-books/page";
+import axios from "axios";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function BookDetailsPage() {
 	const params = useParams();
@@ -19,6 +22,7 @@ export default function BookDetailsPage() {
 	const [book, setBook] = useState<Book | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [borrowing, setBorrowing] = useState(false);
+	const [returnDate, setReturnDate] = useState<string>("");
 
 	useEffect(() => {
 		if (params.id) {
@@ -28,8 +32,8 @@ export default function BookDetailsPage() {
 
 	const loadBook = async (id: string) => {
 		try {
-			const data = await getBook(id);
-			setBook(data);
+			const data = await axios.get(`/api/books/${id}`);
+			setBook(data.data.book);
 		} catch (error) {
 			console.error("Failed to load book:", error);
 			toast("Failed to load book details.");
@@ -43,8 +47,10 @@ export default function BookDetailsPage() {
 
 		setBorrowing(true);
 		try {
-			await borrowBook(book.id, "Current User"); // In a real app, get from auth
-			setBook({ ...book, status: "borrowed" });
+			await axios.post("/api/borrow", {
+				bookId: book._id,
+				returnDate,
+			});
 			toast(
 				"Book borrowed successfully! Contact the owner to arrange pickup."
 			);
@@ -126,7 +132,7 @@ export default function BookDetailsPage() {
 						<CardHeader>
 							<div className='flex items-start justify-between'>
 								<div className='flex-1'>
-									<CardTitle className='text-3xl font-bold text-gray-800 mb-2'>
+									<CardTitle className='md:text-3xl text-xl font-bold text-gray-800 mb-2'>
 										{book.title}
 									</CardTitle>
 									<p className='text-xl text-gray-600'>
@@ -190,19 +196,19 @@ export default function BookDetailsPage() {
 											<div className='flex items-center gap-3'>
 												<Avatar className='h-10 w-10'>
 													<AvatarFallback className='bg-emerald-100 text-emerald-600 font-semibold'>
-														{book.owner
-															.charAt(0)
+														{book?.owner?.name
+															?.charAt(0)
 															.toUpperCase()}
 													</AvatarFallback>
 												</Avatar>
 												<div>
 													<p className='font-medium text-gray-800'>
-														{book.owner}
+														{book?.owner?.name}
 													</p>
 													<div className='flex items-center gap-1 text-sm text-gray-600'>
 														<MapPin className='h-3 w-3' />
 														<span>
-															{book.location}
+															{book?.address}
 														</span>
 													</div>
 												</div>
@@ -222,12 +228,26 @@ export default function BookDetailsPage() {
 												<span>
 													Added:{" "}
 													{new Date(
-														book.createdAt ||
+														book?.createdAt ||
 															Date.now()
 													).toLocaleDateString()}
 												</span>
 											</div>
-											{book.status === "available" ? (
+											<div className='flex items-center gap-2 text-sm text-gray-600'>
+												<Calendar className='h-4 w-4' />
+												<Label>Return Date: </Label>
+												<Input
+													className='w-1/2'
+													type='date'
+													value={returnDate}
+													onChange={(e) =>
+														setReturnDate(
+															e.target.value
+														)
+													}
+												/>
+											</div>
+											{book?.status === "available" ? (
 												<p className='text-emerald-600 font-medium'>
 													✓ Available for borrowing
 												</p>
@@ -247,18 +267,12 @@ export default function BookDetailsPage() {
 												book.status !== "available" ||
 												borrowing
 											}
-											className='flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3'>
+											className='flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 cursor-pointer'>
 											{borrowing
 												? "Requesting..."
 												: book.status === "available"
 												? "Request to Borrow"
 												: "Not Available"}
-										</Button>
-										<Button
-											variant='outline'
-											size='icon'
-											className='border-emerald-200 text-emerald-600 hover:bg-emerald-50 bg-transparent'>
-											<Heart className='h-4 w-4' />
 										</Button>
 									</div>
 								</div>

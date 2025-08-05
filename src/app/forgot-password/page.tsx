@@ -3,7 +3,6 @@
 import type React from "react";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { toast } from "sonner";
 import axios from "axios";
 
 export default function ForgotPasswordPage() {
-	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 	const [email, setEmail] = useState("");
 	const [sent, setSent] = useState(false);
@@ -28,10 +26,9 @@ export default function ForgotPasswordPage() {
 				toast("Email is required!");
 				return;
 			}
-			const res = await axios.post("/api/auth/forgot-password", {
+			await axios.post("/api/auth/forgot-password", {
 				email,
 			});
-			console.log(res.data);
 			setSent(true);
 			toast("Reset link sent!");
 		} catch (error: any) {

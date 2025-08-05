@@ -1,125 +1,112 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { Book } from "@/lib/models"
+import { type NextRequest, NextResponse } from "next/server";
+import Book from "@/models/Book";
+import { verifyToken } from "@/lib/utils";
+import { connectDb } from "@/lib/database";
 
-// In-memory storage (same as in route.ts)
-const books: Book[] = [
-  {
-    id: "1",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    genre: "Fiction",
-    description: "A classic American novel about the Jazz Age and the American Dream.",
-    condition: "Good",
-    owner: "Alice Johnson",
-    location: "New York, NY",
-    status: "available",
-    createdAt: "2024-01-15T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    genre: "Fiction",
-    description: "A gripping tale of racial injustice and childhood innocence.",
-    condition: "Excellent",
-    owner: "Bob Smith",
-    location: "Los Angeles, CA",
-    status: "available",
-    createdAt: "2024-01-16T14:30:00Z",
-  },
-  {
-    id: "3",
-    title: "Dune",
-    author: "Frank Herbert",
-    genre: "Science Fiction",
-    description: "Epic science fiction novel set in a distant future.",
-    condition: "Good",
-    owner: "Carol Davis",
-    location: "Chicago, IL",
-    status: "borrowed",
-    createdAt: "2024-01-17T09:15:00Z",
-  },
-  {
-    id: "4",
-    title: "The Lean Startup",
-    author: "Eric Ries",
-    genre: "Business",
-    description: "How to build a successful startup using validated learning.",
-    condition: "Excellent",
-    owner: "David Wilson",
-    location: "San Francisco, CA",
-    status: "available",
-    createdAt: "2024-01-18T16:45:00Z",
-  },
-  {
-    id: "5",
-    title: "Sapiens",
-    author: "Yuval Noah Harari",
-    genre: "History",
-    description: "A brief history of humankind from the Stone Age to the present.",
-    condition: "Good",
-    owner: "Eva Martinez",
-    location: "Austin, TX",
-    status: "available",
-    createdAt: "2024-01-19T11:20:00Z",
-  },
-  {
-    id: "6",
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    genre: "Fiction",
-    description: "A philosophical story about following your dreams.",
-    condition: "Fair",
-    owner: "Frank Brown",
-    location: "Miami, FL",
-    status: "available",
-    createdAt: "2024-01-20T13:10:00Z",
-  },
-]
-
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const book = books.find((b) => b.id === params.id)
-
-    if (!book) {
-      return NextResponse.json({ error: "Book not found" }, { status: 404 })
-    }
-
-    return NextResponse.json(book)
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch book" }, { status: 500 })
-  }
+function extractIdFromRequest(request: NextRequest) {
+	const url = new URL(request.url, process.env.NEXT_PUBLIC_APP_URL);
+	const pathParts = url.pathname.split("/");
+	return pathParts[pathParts.length - 1];
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const body = await request.json()
-    const bookIndex = books.findIndex((b) => b.id === params.id)
+export async function GET(request: NextRequest) {
+	await connectDb();
+	const id = extractIdFromRequest(request);
+	try {
+		let book = await Book.findById(id).populate("owner");
+		if (!book) {
+			return NextResponse.json(
+				{ message: "Book not found", success: false },
+				{ status: 404 }
+			);
+		}
 
-    if (bookIndex === -1) {
-      return NextResponse.json({ error: "Book not found" }, { status: 404 })
-    }
-
-    books[bookIndex] = { ...books[bookIndex], ...body }
-
-    return NextResponse.json(books[bookIndex])
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to update book" }, { status: 500 })
-  }
+		return NextResponse.json(
+			{ book, success: true, message: "Book fetched successfully" },
+			{ status: 200 }
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ message: "Failed to fetch book", success: false },
+			{ status: 500 }
+		);
+	}
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const bookIndex = books.findIndex((b) => b.id === params.id)
+export async function PUT(request: NextRequest) {
+	await connectDb();
+	try {
+		const body = await request.json();
+		const id = extractIdFromRequest(request);
+		let book = await Book.findById(id).populate("owner");
 
-    if (bookIndex === -1) {
-      return NextResponse.json({ error: "Book not found" }, { status: 404 })
-    }
+		if (!book) {
+			return NextResponse.json(
+				{ message: "Book not found", success: false },
+				{ status: 404 }
+			);
+		}
 
-    books.splice(bookIndex, 1)
+		book = { ...book, ...body };
 
-    return NextResponse.json({ message: "Book deleted successfully" })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to delete book" }, { status: 500 })
-  }
+		await book.save();
+
+		return NextResponse.json(
+			{ book, success: true, message: "Book updated successfully" },
+			{ status: 200 }
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ message: "Failed to update book", success: false },
+			{ status: 500 }
+		);
+	}
+}
+
+export async function DELETE(request: NextRequest) {
+	await connectDb();
+	const token = request.cookies.get("token");
+	if (!token) {
+		return NextResponse.json(
+			{ message: "Authorization token required", success: false },
+			{ status: 401 }
+		);
+	}
+
+	const decoded = verifyToken(token.value);
+	if (!decoded) {
+		return NextResponse.json(
+			{ message: "Invalid or expired token", success: false },
+			{ status: 401 }
+		);
+	}
+	const id = extractIdFromRequest(request);
+	try {
+		let book = await Book.findById(id);
+		if (!book) {
+			return NextResponse.json(
+				{ message: "Book not found", success: false },
+				{ status: 404 }
+			);
+		}
+
+		if (book.owner.toString() !== decoded.userId) {
+			return NextResponse.json(
+				{ message: "Unauthorized", success: false },
+				{ status: 401 }
+			);
+		}
+
+		await book.deleteOne();
+
+		return NextResponse.json(
+			{ message: "Book deleted successfully", success: true },
+			{ status: 200 }
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ message: "Failed to delete book", success: false },
+			{ status: 500 }
+		);
+	}
 }

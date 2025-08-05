@@ -17,7 +17,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { BookOpen, Plus } from "lucide-react";
-import { addBook } from "@/lib/api";
+import axios from "axios";
 import Navigation from "@/components/navigation";
 import { toast } from "sonner";
 
@@ -28,10 +28,11 @@ export default function AddBookPage() {
 		title: "",
 		author: "",
 		genre: "",
+		isbn: "",
+		image: "",
 		description: "",
 		condition: "",
-		owner: "",
-		location: "",
+		address: "",
 	});
 
 	const genres = [
@@ -60,11 +61,23 @@ export default function AddBookPage() {
 		setLoading(true);
 
 		try {
-			await addBook(formData);
-			toast("Your book has been added to the community library.");
-			router.push("/");
+			setLoading(true);
+			const res = await axios.post("/api/books", formData);
+			console.log(res.data);
+			if (res.data.success) {
+				setLoading(false);
+				toast("Your book has been added to the community library.");
+				setTimeout(() => {
+					router.push("/my-books");
+				}, 2000);
+			}
 		} catch (error) {
-			toast("Failed to add book. Please try again.");
+			setLoading(false);
+			console.log("Error adding book:", error);
+			toast(
+				(error as { response: { data: { message: string } } }).response
+					.data.message || "Failed to add book. Please try again."
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -133,6 +146,24 @@ export default function AddBookPage() {
 												)
 											}
 											placeholder='Enter author name'
+											required
+											className='border-emerald-200 focus:border-emerald-500'
+										/>
+									</div>
+								</div>
+								<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+									<div className='space-y-2'>
+										<Label htmlFor='isbn'>ISBN *</Label>
+										<Input
+											id='isbn'
+											value={formData.isbn}
+											onChange={(e) =>
+												handleChange(
+													"isbn",
+													e.target.value
+												)
+											}
+											placeholder='Enter ISBN'
 											required
 											className='border-emerald-200 focus:border-emerald-500'
 										/>
@@ -207,15 +238,14 @@ export default function AddBookPage() {
 
 								<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 									<div className='space-y-2'>
-										<Label htmlFor='owner'>
-											Your Name *
-										</Label>
+										<Label htmlFor='image'>Image *</Label>
 										<Input
-											id='owner'
-											value={formData.owner}
+											id='image'
+											type='file'
+											value={formData.image}
 											onChange={(e) =>
 												handleChange(
-													"owner",
+													"image",
 													e.target.value
 												)
 											}
@@ -225,15 +255,15 @@ export default function AddBookPage() {
 										/>
 									</div>
 									<div className='space-y-2'>
-										<Label htmlFor='location'>
-											Location *
+										<Label htmlFor='address'>
+											Address *
 										</Label>
 										<Input
-											id='location'
-											value={formData.location}
+											id='address'
+											value={formData.address}
 											onChange={(e) =>
 												handleChange(
-													"location",
+													"address",
 													e.target.value
 												)
 											}

@@ -1,154 +1,123 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { BorrowTransaction, BorrowRequest, Book } from "@/lib/models"
-
-// In-memory storage for transactions
-const transactions: BorrowTransaction[] = [
-  {
-    id: "1",
-    bookId: "3",
-    book: {
-      id: "3",
-      title: "Dune",
-      author: "Frank Herbert",
-      genre: "Science Fiction",
-      description: "Epic science fiction novel set in a distant future.",
-      condition: "Good",
-      owner: "Carol Davis",
-      location: "Chicago, IL",
-      status: "borrowed",
-    },
-    borrower: "Current User",
-    borrowDate: "2024-01-20T10:00:00Z",
-    status: "borrowed",
-  },
-]
-
-// Mock books data (should be shared with books API)
-const books: Book[] = [
-  {
-    id: "1",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    genre: "Fiction",
-    description: "A classic American novel about the Jazz Age and the American Dream.",
-    condition: "Good",
-    owner: "Alice Johnson",
-    location: "New York, NY",
-    status: "available",
-    createdAt: "2024-01-15T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    genre: "Fiction",
-    description: "A gripping tale of racial injustice and childhood innocence.",
-    condition: "Excellent",
-    owner: "Bob Smith",
-    location: "Los Angeles, CA",
-    status: "available",
-    createdAt: "2024-01-16T14:30:00Z",
-  },
-  {
-    id: "3",
-    title: "Dune",
-    author: "Frank Herbert",
-    genre: "Science Fiction",
-    description: "Epic science fiction novel set in a distant future.",
-    condition: "Good",
-    owner: "Carol Davis",
-    location: "Chicago, IL",
-    status: "borrowed",
-    createdAt: "2024-01-17T09:15:00Z",
-  },
-  {
-    id: "4",
-    title: "The Lean Startup",
-    author: "Eric Ries",
-    genre: "Business",
-    description: "How to build a successful startup using validated learning.",
-    condition: "Excellent",
-    owner: "David Wilson",
-    location: "San Francisco, CA",
-    status: "available",
-    createdAt: "2024-01-18T16:45:00Z",
-  },
-  {
-    id: "5",
-    title: "Sapiens",
-    author: "Yuval Noah Harari",
-    genre: "History",
-    description: "A brief history of humankind from the Stone Age to the present.",
-    condition: "Good",
-    owner: "Eva Martinez",
-    location: "Austin, TX",
-    status: "available",
-    createdAt: "2024-01-19T11:20:00Z",
-  },
-  {
-    id: "6",
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    genre: "Fiction",
-    description: "A philosophical story about following your dreams.",
-    condition: "Fair",
-    owner: "Frank Brown",
-    location: "Miami, FL",
-    status: "available",
-    createdAt: "2024-01-20T13:10:00Z",
-  },
-]
+import { type NextRequest, NextResponse } from "next/server";
+import BorrowTransaction from "@/models/BorrowTransaction";
+import Book from "@/models/Book";
+import { verifyToken } from "@/lib/utils";
+import { connectDb } from "@/lib/database";
 
 export async function GET(request: NextRequest) {
-  try {
-    // In a real app, filter by authenticated user
-    // For demo, return transactions for "Current User"
-    const userTransactions = transactions.filter((t) => t.borrower === "Current User")
+	try {
+		await connectDb();
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ message: "Authorization token required", success: false },
+				{ status: 401 }
+			);
+		}
+		const decoded = verifyToken(token.value);
+		if (!decoded) {
+			return NextResponse.json(
+				{ message: "Invalid or expired token", success: false },
+				{ status: 401 }
+			);
+		}
+		const userTransactions = await BorrowTransaction.find({
+			borrower: decoded.userId,
+		})
+			.populate("book")
+			.populate("borrower");
 
-    return NextResponse.json(userTransactions)
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch borrowed books" }, { status: 500 })
-  }
+		return NextResponse.json(
+			{
+				transactions: userTransactions,
+				success: true,
+				message: "Borrowed books fetched successfully",
+			},
+			{ status: 200 }
+		);
+	} catch (error) {
+		console.error("Failed to fetch borrowed books:", error);
+		return NextResponse.json(
+			{ message: "Failed to fetch borrowed books", success: false },
+			{ status: 500 }
+		);
+	}
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const body: BorrowRequest = await request.json()
+	try {
+		await connectDb();
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ message: "Authorization token required", success: false },
+				{ status: 401 }
+			);
+		}
+		const decoded = verifyToken(token.value);
+		if (!decoded) {
+			return NextResponse.json(
+				{ message: "Invalid or expired token", success: false },
+				{ status: 401 }
+			);
+		}
+		const { bookId, returnDate } = await request.json();
+		const borrower = decoded.userId;
 
-    if (!body.bookId || !body.borrower) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
+		if (!bookId || !borrower || !returnDate) {
+			return NextResponse.json(
+				{ message: "Missing required fields", success: false },
+				{ status: 400 }
+			);
+		}
 
-    // Find the book
-    const book = books.find((b) => b.id === body.bookId)
-    if (!book) {
-      return NextResponse.json({ error: "Book not found" }, { status: 404 })
-    }
+		// Find the book
+		const book = await Book.findById(bookId);
+		if (!book) {
+			return NextResponse.json(
+				{ message: "Book not found", success: false },
+				{ status: 404 }
+			);
+		}
 
-    if (book.status !== "available") {
-      return NextResponse.json({ error: "Book is not available for borrowing" }, { status: 400 })
-    }
+		if (book.status !== "available") {
+			return NextResponse.json(
+				{
+					message: "Book is not available for borrowing",
+					success: false,
+				},
+				{ status: 400 }
+			);
+		}
 
-    // Create transaction
-    const newTransaction: BorrowTransaction = {
-      id: (transactions.length + 1).toString(),
-      bookId: body.bookId,
-      book: { ...book, status: "borrowed" },
-      borrower: body.borrower,
-      borrowDate: new Date().toISOString(),
-      status: "borrowed",
-    }
+		// Create transaction
+		const newTransaction = new BorrowTransaction({
+			book,
+			borrower,
+			owner: book.owner,
+			borrowDate: new Date().toISOString(),
+			returnDate,
+			status: "borrowed",
+		});
 
-    transactions.push(newTransaction)
+		await newTransaction.save();
 
-    // Update book status
-    const bookIndex = books.findIndex((b) => b.id === body.bookId)
-    if (bookIndex !== -1) {
-      books[bookIndex].status = "borrowed"
-    }
+		// Update book status
+		book.status = "borrowed";
+		await book.save();
 
-    return NextResponse.json(newTransaction, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to borrow book" }, { status: 500 })
-  }
+		return NextResponse.json(
+			{
+				message: "Book borrowed successfully",
+				success: true,
+				transaction: newTransaction,
+			},
+			{ status: 201 }
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ message: "Failed to borrow book", success: false },
+			{ status: 500 }
+		);
+	}
 }

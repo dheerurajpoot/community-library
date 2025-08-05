@@ -22,7 +22,6 @@ import {
 	Home,
 	User,
 	LogOut,
-	Settings,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -139,14 +138,6 @@ export default function Navigation() {
 											Profile
 										</Link>
 									</DropdownMenuItem>
-									<DropdownMenuItem asChild>
-										<Link
-											href='/settings'
-											className='cursor-pointer'>
-											<Settings className='mr-2 h-4 w-4' />
-											Settings
-										</Link>
-									</DropdownMenuItem>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
 										onClick={handleLogout}
@@ -181,7 +172,7 @@ export default function Navigation() {
 								<Menu className='h-5 w-5' />
 							</Button>
 						</SheetTrigger>
-						<SheetContent side='right' className='w-64'>
+						<SheetContent side='right' className='w-64 p-4'>
 							<div className='flex flex-col gap-4 mt-8'>
 								<NavContent />
 								{user ? (

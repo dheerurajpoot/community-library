@@ -1,26 +1,30 @@
-export interface Book {
-  id: string
-  title: string
-  author: string
-  isbn?: string
-  genre: string
-  description: string
-  condition: string
-  ownerId: string
-  owner: string
-  location: string
-  status: "available" | "borrowed"
-  images?: string[]
-  createdAt: string
-  updatedAt: string
-}
+import mongoose from "mongoose";
+import "./User";
 
-export interface AddBookRequest {
-  title: string
-  author: string
-  isbn?: string
-  genre: string
-  description: string
-  condition: string
-  location: string
-}
+const bookSchema = new mongoose.Schema(
+	{
+		title: { type: String, required: true },
+		author: { type: String, required: true },
+		isbn: { type: String },
+		genre: { type: String, required: true },
+		description: { type: String, required: true },
+		condition: { type: String, required: true },
+		owner: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+			required: true,
+		},
+		address: { type: String, required: true },
+		status: {
+			type: String,
+			enum: ["available", "borrowed"],
+			required: true,
+		},
+		image: { type: String },
+	},
+	{
+		timestamps: true,
+	}
+);
+
+export default mongoose.models.Book || mongoose.model("Book", bookSchema);

@@ -8,22 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
 	Mail,
 	Phone,
 	MapPin,
 	Calendar,
-	BookOpen,
 	RotateCcw,
 	Edit,
 	User2,
 } from "lucide-react";
-import { updateProfile } from "@/lib/api";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import { toast } from "sonner";
 import type { User } from "@/contexts/AuthContext";
+import axios from "axios";
 
 export default function ProfilePage() {
 	const [loading, setLoading] = useState(false);
@@ -42,8 +40,8 @@ export default function ProfilePage() {
 	const getUser = async () => {
 		try {
 			setLoading(true);
-			const res = await fetch("/api/auth/me");
-			const data = await res.json();
+			const res = await axios.get("/api/auth/me");
+			const data = await res.data;
 			if (data.success) {
 				setUser(data.user);
 			}
@@ -77,7 +75,7 @@ export default function ProfilePage() {
 		setLoading(true);
 
 		try {
-			const updatedUser = await updateProfile(formData);
+			await axios.put("/api/auth/me", formData);
 			setEditing(false);
 			toast("Profile updated successfully");
 		} catch (error) {
@@ -383,43 +381,6 @@ export default function ProfilePage() {
 
 						{/* Activity Summary */}
 						<div className='space-y-6'>
-							<Card className='shadow-xl border-0 bg-white/80 backdrop-blur-sm'>
-								<CardHeader>
-									<CardTitle className='flex items-center gap-2 text-emerald-600'>
-										<BookOpen className='h-5 w-5' />
-										Activity Summary
-									</CardTitle>
-								</CardHeader>
-								<CardContent className='space-y-4'>
-									<div className='flex items-center justify-between'>
-										<span className='text-sm text-gray-600'>
-											Books Shared
-										</span>
-										<span className='font-semibold text-emerald-600'>
-											12
-										</span>
-									</div>
-									<Separator />
-									<div className='flex items-center justify-between'>
-										<span className='text-sm text-gray-600'>
-											Books Borrowed
-										</span>
-										<span className='font-semibold text-teal-600'>
-											8
-										</span>
-									</div>
-									<Separator />
-									<div className='flex items-center justify-between'>
-										<span className='text-sm text-gray-600'>
-											Active Loans
-										</span>
-										<span className='font-semibold text-cyan-600'>
-											3
-										</span>
-									</div>
-								</CardContent>
-							</Card>
-
 							<Card className='shadow-xl border-0 bg-white/80 backdrop-blur-sm'>
 								<CardHeader>
 									<CardTitle className='flex items-center gap-2 text-emerald-600'>
