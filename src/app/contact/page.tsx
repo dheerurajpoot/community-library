@@ -35,7 +35,7 @@ export default function ContactPage() {
 							<p className='text-gray-600 mb-8 w-1/2'>
 								We are here to help! Whether you have questions
 								about using the platform, need technical
-								support, or want to share feedback, don't
+								support, or want to share feedback, don&apos;t
 								hesitate to reach out.
 							</p>
 						</div>

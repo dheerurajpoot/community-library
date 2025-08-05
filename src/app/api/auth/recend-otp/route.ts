@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/database";
+import { connectDb } from "@/lib/database";
 import { generateOTP } from "@/lib/utils";
 import { generateOTPEmail, sendEmail } from "@/lib/email";
 import User from "@/models/User";
 export async function POST(request: NextRequest) {
 	try {
-		await connectDB();
+		await connectDb();
 		const { email } = await request.json();
 
 		if (!email) {

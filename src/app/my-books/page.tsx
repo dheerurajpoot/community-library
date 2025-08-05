@@ -83,7 +83,7 @@ export default function MyBooksPage() {
 						My Books
 					</h1>
 					<p className='text-gray-600'>
-						Manage the books you've shared with the community
+						Manage the books you&apos;ve shared with the community
 					</p>
 				</div>
 

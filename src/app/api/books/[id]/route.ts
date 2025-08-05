@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 	await connectDb();
 	const id = extractIdFromRequest(request);
 	try {
-		let book = await Book.findById(id).populate("owner");
+		const book = await Book.findById(id).populate("owner");
 		if (!book) {
 			return NextResponse.json(
 				{ message: "Book not found", success: false },
@@ -82,7 +82,7 @@ export async function DELETE(request: NextRequest) {
 	}
 	const id = extractIdFromRequest(request);
 	try {
-		let book = await Book.findById(id);
+		const book = await Book.findById(id);
 		if (!book) {
 			return NextResponse.json(
 				{ message: "Book not found", success: false },

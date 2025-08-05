@@ -1,10 +1,10 @@
-import { connectDB } from "@/lib/database";
+import { connectDb } from "@/lib/database";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 export async function GET() {
 	try {
-		await connectDB();
+		await connectDb();
 		const response = new NextResponse();
 		response.cookies.set("token", "", {
 			httpOnly: true,

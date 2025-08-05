@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
 			});
 			setSuccess(true);
 			toast("Password reset successful!");
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Reset failed", error);
 			toast("Reset failed");
 		} finally {

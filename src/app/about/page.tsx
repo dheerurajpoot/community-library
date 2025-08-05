@@ -119,11 +119,11 @@ export default function AboutPage() {
 								opportunities along the way.
 							</p>
 							<p>
-								We're proud to be part of the sharing economy
-								movement, promoting sustainability while making
-								knowledge more accessible to everyone. Every
-								book shared is a step toward a more connected
-								and educated world.
+								We&apos;re proud to be part of the sharing
+								economy movement, promoting sustainability while
+								making knowledge more accessible to everyone.
+								Every book shared is a step toward a more
+								connected and educated world.
 							</p>
 						</div>
 					</div>

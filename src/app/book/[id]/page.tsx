@@ -101,7 +101,7 @@ export default function BookDetailsPage() {
 							Book not found
 						</h3>
 						<p className='text-gray-500 mb-4'>
-							The book you're looking for doesn't exist.
+							The book you&apos;re looking for doesn&apos;t exist.
 						</p>
 						<Button
 							onClick={() => router.push("/")}

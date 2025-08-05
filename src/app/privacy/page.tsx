@@ -349,7 +349,7 @@ export default function PrivacyPolicyPage() {
 						<CardHeader>
 							<CardTitle className='flex items-center gap-2 text-emerald-600'>
 								<Shield className='h-5 w-5' />
-								Children's Privacy
+								Children&apos;s Privacy
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
@@ -378,11 +378,12 @@ export default function PrivacyPolicyPage() {
 								We may update this Privacy Policy from time to
 								time. We will notify you of any changes by
 								posting the new Privacy Policy on this page and
-								updating the "Last updated" date. We encourage
-								you to review this Privacy Policy periodically
-								for any changes. Your continued use of our
-								service after any modifications constitutes
-								acceptance of the updated Privacy Policy.
+								updating the &quot;Last updated&quot; date. We e
+								encourage you to review this Privacy Policy
+								periodically for any changes. Your continued use
+								of our service after any modifications
+								constitutes acceptance of the updated Privacy
+								Policy.
 							</p>
 						</CardContent>
 					</Card>

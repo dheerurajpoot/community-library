@@ -15,9 +15,24 @@ import { BookOpen, Calendar, User, MapPin, RotateCcw } from "lucide-react";
 import Navigation from "@/components/navigation";
 import { toast } from "sonner";
 import axios from "axios";
+import Link from "next/link";
+
+interface BorrowTransaction {
+	_id: string;
+	book: {
+		_id: string;
+		title: string;
+		author: string;
+		owner: string;
+		address: string;
+	};
+	borrowDate: string;
+	returnDate: string;
+	status: string;
+}
 
 export default function BorrowedBooksPage() {
-	const [transactions, setTransactions] = useState<any[]>([]);
+	const [transactions, setTransactions] = useState<BorrowTransaction[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -46,7 +61,7 @@ export default function BorrowedBooksPage() {
 			await axios.put(`/api/borrow/${transactionId}/return`);
 			setTransactions(
 				transactions.map((t) =>
-					t.id === transactionId
+					t._id === transactionId
 						? {
 								...t,
 								status: "returned",
@@ -117,7 +132,7 @@ export default function BorrowedBooksPage() {
 							community!
 						</p>
 						<Button className='bg-emerald-600 hover:bg-emerald-700'>
-							<a href='/'>Browse Books</a>
+							<Link href='/'>Browse Books</Link>
 						</Button>
 					</div>
 				) : (

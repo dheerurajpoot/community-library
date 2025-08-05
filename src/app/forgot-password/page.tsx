@@ -31,11 +31,9 @@ export default function ForgotPasswordPage() {
 			});
 			setSent(true);
 			toast("Reset link sent!");
-		} catch (error: any) {
-			toast(
-				error.response?.data?.message ||
-					"Failed to send reset email. Please try again."
-			);
+		} catch (error) {
+			console.error("Failed to send reset email:", error);
+			toast("Failed to send reset email. Please try again.");
 		} finally {
 			setLoading(false);
 		}

@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/database";
+import { connectDb } from "@/lib/database";
 import { hashPassword } from "@/lib/utils";
 import User from "@/models/User";
 
 export async function POST(request: NextRequest) {
 	try {
-		await connectDB();
+		await connectDb();
 		const { token, password } = await request.json();
 
 		if (!token || !password) {

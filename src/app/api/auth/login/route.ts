@@ -1,12 +1,12 @@
 import { comparePassword, generateToken } from "@/lib/utils";
 import User from "@/models/User";
 import { type NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/database";
+import { connectDb } from "@/lib/database";
 
 export async function POST(request: NextRequest) {
 	try {
 		// Connect to MongoDB
-		await connectDB();
+		await connectDb();
 
 		const { email, password } = await request.json();
 

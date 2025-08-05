@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/database";
+import { connectDb } from "@/lib/database";
 import User from "@/models/User";
 
 export async function POST(request: NextRequest) {
 	try {
-		await connectDB();
+		await connectDb();
 		const { email, otp } = await request.json();
 
 		if (!email || !otp) {

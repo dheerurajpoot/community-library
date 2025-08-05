@@ -63,11 +63,9 @@ export default function SignupPage() {
 					);
 				}, 2000);
 			}
-		} catch (error: any) {
-			toast.error(
-				error.response?.data?.message ||
-					"Failed to create account. Please try again."
-			);
+		} catch (error) {
+			console.error("Failed to create account:", error);
+			toast.error("Failed to create account. Please try again.");
 		} finally {
 			setLoading(false);
 		}

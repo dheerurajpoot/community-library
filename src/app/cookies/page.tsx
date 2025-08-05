@@ -415,9 +415,9 @@ export default function CookiePolicyPage() {
 								other operational, legal, or regulatory reasons.
 								We will notify you of any material changes by
 								posting the updated policy on our website and
-								updating the "Last updated" date. We encourage
-								you to review this policy periodically to stay
-								informed about our use of cookies.
+								updating the &quot;Last updated&quot; date. We e
+								encourage you to review this policy periodically
+								to stay informed about our use of cookies.
 							</p>
 						</CardContent>
 					</Card>
@@ -451,8 +451,8 @@ export default function CookiePolicyPage() {
 								<p className='text-sm text-emerald-800'>
 									<strong>Quick Tip:</strong> You can also
 									manage your cookie preferences by clicking
-									the "Cookie Settings" link in our website
-									footer at any time.
+									the &quot;Cookie Settings&quot; link in our
+									website footer at any time.
 								</p>
 							</div>
 						</CardContent>
