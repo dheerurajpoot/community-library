@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Eye, EyeOff } from "lucide-react";
-import { signup } from "@/lib/auth";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function SignupPage() {
 	const router = useRouter();
@@ -43,13 +43,26 @@ export default function SignupPage() {
 
 		try {
 			const { firstName, lastName, email, password, phone } = formData;
-			await signup({ firstName, lastName, email, password, phone });
-
-			toast.success("Account created!", {
-				description: "Please check your email to verify your account.",
+			const res = await axios.post("/api/auth/signup", {
+				firstName,
+				lastName,
+				email,
+				phone,
+				password,
 			});
+			console.log(res.data);
+			if (res.data.success) {
+				toast.success("Account created!", {
+					description:
+						"Please check your email to verify your account.",
+				});
 
-			router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+				setTimeout(() => {
+					router.push(
+						`/verify-otp?email=${encodeURIComponent(email)}`
+					);
+				}, 2000);
+			}
 		} catch (error: any) {
 			toast.error(
 				error.response?.data?.message ||

@@ -1,20 +1,29 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { connectDB } from "@/lib/database";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
-  try {
-    // In a real app with server-side sessions, you would:
-    // 1. Invalidate the session
-    // 2. Clear server-side session storage
-    // 3. Add token to blacklist if using JWT
+export const revalidate = 0;
+export async function GET() {
+	try {
+		await connectDB();
+		const response = new NextResponse();
+		response.cookies.set("token", "", {
+			httpOnly: true,
+			expires: new Date(0),
+			path: "/",
+		});
 
-    // For JWT tokens stored client-side, logout is handled on the frontend
-    // by removing the token from localStorage
-
-    return NextResponse.json({
-      message: "Logged out successfully",
-    })
-  } catch (error) {
-    console.error("Logout error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
+		return response;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(error);
+			return NextResponse.json(
+				{ message: error.message },
+				{ status: 500 }
+			);
+		}
+		return NextResponse.json(
+			{ message: "Internal Server Error" },
+			{ status: 500 }
+		);
+	}
 }

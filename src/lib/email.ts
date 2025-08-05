@@ -1,21 +1,40 @@
-// Email service utility (simulated for demo)
-export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  // In production, integrate with services like:
-  // - SendGrid
-  // - AWS SES
-  // - Nodemailer with SMTP
-  // - Resend
+import nodemailer from "nodemailer";
 
-  console.log(`📧 Email sent to: ${to}`)
-  console.log(`📧 Subject: ${subject}`)
-  console.log(`📧 Content: ${html}`)
+const transporter = nodemailer.createTransport({
+	host: process.env.SMTP_HOST || "smtp.gmail.com",
+	port: Number.parseInt(process.env.SMTP_PORT || "587"),
+	secure: false,
+	auth: {
+		user: process.env.SMTP_USER,
+		pass: process.env.SMTP_PASS,
+	},
+});
 
-  // Simulate email sending delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+export async function sendEmail({
+	to,
+	subject,
+	html,
+}: {
+	to: string;
+	subject: string;
+	html: string;
+}) {
+	try {
+		await transporter.sendMail({
+			from: process.env.SMTP_FROM || "noreply@affiliatehub.com",
+			to,
+			subject,
+			html,
+		});
+		return { success: true };
+	} catch (error) {
+		console.error("Email sending error:", error);
+		return { success: false, error };
+	}
 }
 
 export function generateOTPEmail(otp: string): string {
-  return `
+	return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -50,11 +69,11 @@ export function generateOTPEmail(otp: string): string {
       </div>
     </body>
     </html>
-  `
+  `;
 }
 
 export function generatePasswordResetEmail(resetLink: string): string {
-  return `
+	return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -89,5 +108,5 @@ export function generatePasswordResetEmail(resetLink: string): string {
       </div>
     </body>
     </html>
-  `
+  `;
 }

@@ -10,14 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail } from "lucide-react";
-import { verifyOTP } from "@/lib/auth";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function VerifyOTPPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const { login } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [otp, setOtp] = useState("");
 	const [email, setEmail] = useState("");
@@ -31,48 +29,50 @@ export default function VerifyOTPPage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		if (!email) {
-			toast("Email required", {
-				description: "Please provide your email address.",
-			});
-			return;
-		}
-
-		if (otp.length !== 6) {
-			toast("Invalid OTP", {
-				description: "Please enter a valid 6-digit OTP.",
-			});
-			return;
-		}
-
 		setLoading(true);
 
 		try {
-			const response = await verifyOTP({ email, otp });
-			login(response.user, response.token);
-
-			toast("Account verified!", {
-				description: "Welcome to Community Library!",
+			const response = await axios.post("/api/auth/verify-otp", {
+				email,
+				otp: otp.trim(),
 			});
 
-			router.push("/");
-		} catch (error: any) {
-			toast("Verification failed", {
-				description:
-					error.response?.data?.message ||
-					"Invalid OTP. Please try again.",
-			});
+			if (response.data.success) {
+				localStorage.removeItem("verificationEmail");
+
+				toast("Email verified successfully! Redirecting...");
+				setTimeout(() => {
+					router.push("/login");
+				}, 2000);
+			}
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				toast.error(err.response?.data?.error || "Invalid OTP");
+			} else {
+				toast.error("An unknown error occurred");
+			}
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	const handleResendOTP = async () => {
-		// In a real app, this would call an API to resend the OTP
-		toast("OTP Resent", {
-			description: "A new verification code has been sent to your email.",
-		});
+		setLoading(true);
+
+		try {
+			await axios.post("/api/auth/resend-otp", { email });
+			toast("New OTP sent to your email");
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				toast.error(
+					err.response?.data?.error || "Failed to resend OTP"
+				);
+			} else {
+				toast.error("An unexpected error occurred");
+			}
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -86,7 +86,7 @@ export default function VerifyOTPPage() {
 						Verify Your Email
 					</h1>
 					<p className='text-gray-600'>
-						We've sent a 6-digit verification code to
+						We&apos;ve sent a 6-digit verification code to
 						<br />
 						<span className='font-medium text-emerald-600'>
 							{email}
@@ -135,7 +135,7 @@ export default function VerifyOTPPage() {
 
 						<div className='mt-6 text-center space-y-4'>
 							<p className='text-sm text-gray-600'>
-								Didn't receive the code?{" "}
+								Didn&apos;t receive the code?{" "}
 								<button
 									onClick={handleResendOTP}
 									className='text-emerald-600 hover:text-emerald-700 font-medium hover:underline'>

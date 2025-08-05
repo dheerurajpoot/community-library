@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Eye, EyeOff, CheckCircle } from "lucide-react";
-import { resetPassword } from "@/lib/auth";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function ResetPasswordPage() {
 	const router = useRouter();
@@ -20,21 +20,39 @@ export default function ResetPasswordPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [success, setSuccess] = useState(false);
-	const [token, setToken] = useState("");
 	const [formData, setFormData] = useState({
 		password: "",
 		confirmPassword: "",
 	});
+	const token = searchParams.get("token");
 
 	useEffect(() => {
-		const tokenParam = searchParams.get("token");
-		if (!tokenParam) {
+		if (!token) {
 			toast("Invalid reset link");
 			router.push("/forgot-password");
 			return;
 		}
-		setToken(tokenParam);
-	}, [searchParams, router, toast]);
+		// Validate token
+		const validateToken = async () => {
+			try {
+				await axios.post("/api/auth/verify-reset-token", { token });
+				setLoading(true);
+			} catch (err) {
+				if (axios.isAxiosError(err)) {
+					toast(
+						err.response?.data?.error ||
+							"Invalid or expired reset link"
+					);
+				} else {
+					toast("An unknown error occurred");
+				}
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		validateToken();
+	}, [token]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -52,7 +70,10 @@ export default function ResetPasswordPage() {
 		setLoading(true);
 
 		try {
-			await resetPassword({ token, password: formData.password });
+			await axios.post("/api/auth/reset-password", {
+				token,
+				password: formData.password,
+			});
 			setSuccess(true);
 			toast("Password reset successful!");
 		} catch (error: any) {

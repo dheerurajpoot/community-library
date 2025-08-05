@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Eye, EyeOff } from "lucide-react";
-import { login } from "@/lib/auth";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import axios, { AxiosError } from "axios";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
 	const router = useRouter();
-	const { login: authLogin } = useAuth();
+	const { setUser } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [formData, setFormData] = useState({
@@ -26,23 +26,33 @@ export default function LoginPage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setLoading(true);
-
 		try {
-			const response = await login(formData);
-			authLogin(response.user, response.token);
-			toast("Welcome back!", {
-				description: "You have been successfully logged in.",
-			});
-			router.push("/");
-		} catch (error: any) {
-			toast("Login failed", {
-				description:
-					error.response?.data?.message ||
-					"Invalid email or password.",
-			});
-		} finally {
+			setLoading(true);
+			const response = await axios.post("/api/auth/login", formData);
+			if (response.data.success) {
+				localStorage.setItem(
+					"user",
+					JSON.stringify(response.data.user)
+				);
+				setUser(response.data.user);
+				setLoading(false);
+				toast.success("Login successful");
+				setTimeout(() => {
+					router.push("/");
+				}, 1000);
+			} else {
+				toast.error(response.data.message || "Login failed");
+				setLoading(false);
+				console.log("Login failed:", response.data);
+			}
+		} catch (error) {
+			const err = error as AxiosError<{
+				message?: string;
+				error?: string;
+			}>;
+			const apiError = err.response?.data?.message || "Login failed";
 			setLoading(false);
+			console.error("Login failed:", error);
 		}
 	};
 

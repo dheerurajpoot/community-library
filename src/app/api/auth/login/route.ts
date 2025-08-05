@@ -1,63 +1,72 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { User, LoginRequest } from "@/models"
-import { comparePassword, generateToken } from "@/lib/utils/auth"
-
-// In-memory storage (use database in production)
-const users: User[] = [
-  {
-    id: "1",
-    email: "demo@example.com",
-    password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm", // 'password123'
-    firstName: "Demo",
-    lastName: "User",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St",
-    city: "Demo City",
-    state: "DC",
-    zipCode: "12345",
-    isVerified: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-]
+import { comparePassword, generateToken } from "@/lib/utils";
+import User from "@/models/User";
+import { type NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/database";
 
 export async function POST(request: NextRequest) {
-  try {
-    const body: LoginRequest = await request.json()
+	try {
+		// Connect to MongoDB
+		await connectDB();
 
-    if (!body.email || !body.password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
-    }
+		const { email, password } = await request.json();
 
-    // Find user by email
-    const user = users.find((u) => u.email === body.email)
-    if (!user) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-    }
+		const user = await User.findOne({ email });
 
-    // Check if user is verified
-    if (!user.isVerified) {
-      return NextResponse.json({ error: "Please verify your email before logging in" }, { status: 401 })
-    }
+		if (!user) {
+			return NextResponse.json(
+				{ success: false, message: "User not found with this email!" },
+				{ status: 404 }
+			);
+		}
 
-    // Verify password
-    const isValidPassword = await comparePassword(body.password, user.password)
-    if (!isValidPassword) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-    }
+		// Check if user is active
+		if (!user.isActive) {
+			return NextResponse.json(
+				{
+					success: false,
+					message: "Account is not active contact support!",
+				},
+				{ status: 403 }
+			);
+		}
 
-    // Generate JWT token
-    const token = generateToken(user.id)
+		const isPasswordValid = await comparePassword(password, user.password);
 
-    // Remove password from response
-    const { password, ...userWithoutPassword } = user
+		if (!isPasswordValid) {
+			return NextResponse.json(
+				{ success: false, message: "Invalid password, Try again!" },
+				{ status: 401 }
+			);
+		}
 
-    return NextResponse.json({
-      user: userWithoutPassword,
-      token,
-    })
-  } catch (error) {
-    console.error("Login error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
+		const token = generateToken(user._id.toString());
+		const response = NextResponse.json({
+			message: "Login successful",
+			success: true,
+			user: {
+				_id: user._id,
+				name: user.name,
+				phone: user.phone,
+				email: user.email,
+				role: user.role,
+				isActive: user.isActive,
+				isBlocked: user.isBlocked,
+			},
+		});
+
+		response.cookies.set("token", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			maxAge: 30 * 24 * 60 * 60,
+		});
+
+		return response;
+	} catch (error) {
+		console.log("Error in login route", error);
+		return NextResponse.json(
+			{ success: false, message: "Internal server error" },
+			{ status: 500 }
+		);
+	}
 }

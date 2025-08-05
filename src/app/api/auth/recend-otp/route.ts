@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/database";
-import { generateResetToken } from "@/lib/utils";
-import { sendEmail, generatePasswordResetEmail } from "@/lib/email";
+import { generateOTP } from "@/lib/utils";
+import { generateOTPEmail, sendEmail } from "@/lib/email";
 import User from "@/models/User";
-
 export async function POST(request: NextRequest) {
 	try {
 		await connectDB();
@@ -25,34 +24,40 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const resetToken = generateResetToken();
-		const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+		if (user.isEmailVerified) {
+			return NextResponse.json(
+				{ error: "Email already verified", success: false },
+				{ status: 400 }
+			);
+		}
 
-		const updatedUser = await User.findByIdAndUpdate(
-			user._id,
+		const otp = generateOTP();
+		const otpExpires = new Date(Date.now() + 600000); // 10 minutes
+
+		await User.updateOne(
+			{ email },
 			{
-				passwordResetToken: resetToken,
-				passwordResetExpires: resetExpires,
-				updatedAt: new Date(),
-			},
-			{ new: true }
+				$set: {
+					emailVerificationOtp: otp,
+					emailVerificationExpires: otpExpires,
+					updatedAt: new Date(),
+				},
+			}
 		);
 
-		const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
-		const emailHtml = generatePasswordResetEmail(resetUrl);
-
+		const emailHtml = generateOTPEmail(otp);
 		await sendEmail({
 			to: email,
-			subject: "Reset Your Password - Community Library",
+			subject: "Verify Your Email - AffiliateHub",
 			html: emailHtml,
 		});
 
 		return NextResponse.json(
-			{ message: "Password reset email sent", success: true },
+			{ message: "OTP sent successfully", success: true },
 			{ status: 200 }
 		);
 	} catch (error) {
-		console.error("Forgot password error:", error);
+		console.error("Resend OTP error:", error);
 		return NextResponse.json(
 			{ error: "Internal server error", success: false },
 			{ status: 500 }
