@@ -2,37 +2,30 @@ import { type NextRequest, NextResponse } from "next/server";
 import Book from "@/models/Book";
 import { verifyToken } from "@/lib/utils";
 import { connectDb } from "@/lib/database";
+import { uploadImage } from "@/lib/image-upload";
 
 export async function GET(request: NextRequest) {
 	try {
 		await connectDb();
 
-		const { searchParams } = request.nextUrl;
-		const search = searchParams.get("search") || "";
-		const owner = searchParams.get("owner");
+		const searchParams = request.nextUrl.searchParams;
+		const search = searchParams.get("search");
+		let books;
 
-		let query: any = {};
+		if (search) {
+			const searchRegex = { $regex: search, $options: "i" };
 
-		if (owner) {
-			const token = request.cookies.get("token")?.value;
-			if (!token || !verifyToken(token)) {
-				return NextResponse.json(
-					{ message: "Unauthorized access", success: false },
-					{ status: 401 }
-				);
-			}
-			query.owner = owner;
-		} else if (search) {
-			const regex = new RegExp(search, "i");
-			query.$or = [
-				{ title: regex },
-				{ author: regex },
-				{ genre: regex },
-				{ isbn: regex },
-			];
+			books = await Book.find({
+				$or: [
+					{ title: searchRegex },
+					{ author: searchRegex },
+					{ genre: searchRegex },
+					{ isbn: searchRegex },
+				],
+			}).populate("owner");
+		} else {
+			books = await Book.find().populate("owner");
 		}
-
-		const books = await Book.find(query).populate("owner");
 
 		return NextResponse.json({
 			books,
@@ -40,7 +33,7 @@ export async function GET(request: NextRequest) {
 			message: "Books fetched successfully",
 		});
 	} catch (error) {
-		console.error("GET /api/books error:", error);
+		console.error("Error fetching books:", error);
 		return NextResponse.json(
 			{ message: "Failed to fetch books", success: false },
 			{ status: 500 }
@@ -84,11 +77,22 @@ export async function POST(request: NextRequest) {
 			}
 		}
 
+		console.log("Image:", image);
+
+		const imageUrl = await uploadImage(image);
+		if (!imageUrl) {
+			return NextResponse.json(
+				{ message: "Failed to upload image", success: false },
+				{ status: 500 }
+			);
+		}
+		console.log("Image URL:", imageUrl);
+
 		const newBook = await Book.create({
 			title,
 			author,
 			isbn,
-			image,
+			image: imageUrl,
 			genre,
 			description,
 			condition,

@@ -48,7 +48,7 @@ export default function MyBooksPage() {
 
 	const loadMyBooks = async () => {
 		try {
-			const res = await axios.get("/api/books?owner=");
+			const res = await axios.get("/api/books/my-books");
 			setBooks(res.data.books);
 		} catch (error) {
 			console.error("Failed to load books:", error);
