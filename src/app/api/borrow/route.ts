@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
 		const token = request.cookies.get("token");
 		if (!token) {
 			return NextResponse.json(
-				{ message: "Authorization token required", success: false },
+				{
+					message: "First Login to get your borrowed books",
+					success: false,
+				},
 				{ status: 401 }
 			);
 		}
@@ -50,14 +53,14 @@ export async function POST(request: NextRequest) {
 		const token = request.cookies.get("token");
 		if (!token) {
 			return NextResponse.json(
-				{ message: "Authorization token required", success: false },
+				{ message: "Login to borrow a book!", success: false },
 				{ status: 401 }
 			);
 		}
 		const decoded = verifyToken(token.value);
 		if (!decoded) {
 			return NextResponse.json(
-				{ message: "Invalid or expired token", success: false },
+				{ message: "Invalid or expired login", success: false },
 				{ status: 401 }
 			);
 		}

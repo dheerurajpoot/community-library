@@ -5,7 +5,7 @@ export const config = {
 	matcher: [
 		"/",
 		"/auth/login",
-		"/auth/register",
+		"/auth/signup",
 		"/auth/verify-otp",
 		"/auth/logout",
 		"/auth/forgot-password",
@@ -26,14 +26,13 @@ export async function middleware(request: NextRequest) {
 
 	// Always allow API routes to pass through
 	if (pathname.startsWith("/api/")) {
-		console.log("Allowing API route");
 		return NextResponse.next();
 	}
 
 	// Public routes that don't require authentication
 	const publicRoutes = [
 		"/auth/login",
-		"/auth/register",
+		"/auth/signup",
 		"/auth/verify-otp",
 		"/auth/forgot-password",
 		"/auth/reset-password",
@@ -64,7 +63,7 @@ export async function middleware(request: NextRequest) {
 
 	const authPages = [
 		"/auth/login",
-		"/auth/register",
+		"/auth/signup",
 		"/auth/forgot-password",
 		"/auth/reset-password",
 		"/auth/verify-otp",

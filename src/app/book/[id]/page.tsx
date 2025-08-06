@@ -54,8 +54,13 @@ export default function BookDetailsPage() {
 				"Book borrowed successfully! Contact the owner to arrange pickup."
 			);
 		} catch (error) {
-			console.error("Failed to borrow book:", error);
-			toast("Failed to borrow book. Please try again.");
+			if (axios.isAxiosError(error)) {
+				console.error("Failed to borrow book:", error);
+				toast.error(
+					error.response?.data?.message ||
+						"Failed to borrow book. Please try again."
+				);
+			}
 		} finally {
 			setBorrowing(false);
 		}
