@@ -7,28 +7,32 @@ export async function GET(request: NextRequest) {
 	try {
 		await connectDb();
 
-		const token = request.cookies.get("token");
-		if (!token) {
-			return NextResponse.json(
-				{ message: "Authorization token required", success: false },
-				{ status: 401 }
-			);
+		const { searchParams } = request.nextUrl;
+		const search = searchParams.get("search") || "";
+		const owner = searchParams.get("owner");
+
+		let query: any = {};
+
+		if (owner) {
+			const token = request.cookies.get("token")?.value;
+			if (!token || !verifyToken(token)) {
+				return NextResponse.json(
+					{ message: "Unauthorized access", success: false },
+					{ status: 401 }
+				);
+			}
+			query.owner = owner;
+		} else if (search) {
+			const regex = new RegExp(search, "i");
+			query.$or = [
+				{ title: regex },
+				{ author: regex },
+				{ genre: regex },
+				{ isbn: regex },
+			];
 		}
 
-		const decoded = verifyToken(token.value);
-		if (!decoded) {
-			return NextResponse.json(
-				{ message: "Invalid or expired token", success: false },
-				{ status: 401 }
-			);
-		}
-		const owner = request.nextUrl.searchParams.get("owner");
-		let books;
-		if (owner) {
-			books = await Book.find({ owner: owner }).populate("owner");
-		} else {
-			books = await Book.find().populate("owner");
-		}
+		const books = await Book.find(query).populate("owner");
 
 		return NextResponse.json({
 			books,
@@ -36,6 +40,7 @@ export async function GET(request: NextRequest) {
 			message: "Books fetched successfully",
 		});
 	} catch (error) {
+		console.error("GET /api/books error:", error);
 		return NextResponse.json(
 			{ message: "Failed to fetch books", success: false },
 			{ status: 500 }
@@ -46,72 +51,63 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	try {
 		await connectDb();
+
 		const {
 			title,
 			author,
 			genre,
-			description,
+			description = "",
 			condition,
 			address,
 			isbn,
 			image,
 		} = await request.json();
 
-		const token = request.cookies.get("token");
-		if (!token) {
-			return NextResponse.json(
-				{ message: "Authorization token required", success: false },
-				{ status: 401 }
-			);
-		}
+		const token = request.cookies.get("token")?.value;
+		const decoded = token && verifyToken(token);
 
-		const decoded = verifyToken(token.value);
 		if (!decoded) {
 			return NextResponse.json(
-				{ message: "Invalid or expired token", success: false },
+				{ message: "Unauthorized access", success: false },
 				{ status: 401 }
 			);
 		}
 
-		const owner = decoded.userId;
-
-		// Validate required fields
-		if (
-			!title ||
-			!author ||
-			!genre ||
-			!address ||
-			!isbn ||
-			!owner ||
-			!image
-		) {
-			return NextResponse.json(
-				{ message: "Missing required fields" },
-				{ status: 400 }
-			);
+		// Required fields validation
+		const requiredFields = { title, author, genre, address, isbn, image };
+		for (const [key, value] of Object.entries(requiredFields)) {
+			if (!value) {
+				return NextResponse.json(
+					{ message: `Missing field: ${key}` },
+					{ status: 400 }
+				);
+			}
 		}
 
-		const newBook = {
+		const newBook = await Book.create({
 			title,
 			author,
 			isbn,
 			image,
 			genre,
-			description: description || "",
+			description,
 			condition,
-			owner,
+			owner: decoded.userId,
 			address,
 			status: "available",
-			createdAt: new Date().toISOString(),
-		};
-
-		const savedBook = await Book.create(newBook);
+			createdAt: new Date(),
+		});
 
 		return NextResponse.json(
-			{ savedBook, success: true, message: "Book created successfully" },
+			{
+				savedBook: newBook,
+				success: true,
+				message: "Book created successfully",
+			},
 			{ status: 201 }
 		);
 	} catch (error) {
+		console.error("POST /api/books error:", error);
 		return NextResponse.json(
 			{ message: "Failed to create book", success: false },
 			{ status: 500 }

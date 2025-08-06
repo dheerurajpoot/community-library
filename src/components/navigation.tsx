@@ -68,8 +68,8 @@ export default function Navigation() {
 							variant={isActive ? "default" : "ghost"}
 							className={`w-full justify-start gap-2 ${
 								isActive
-									? "bg-emerald-600 hover:bg-emerald-700 text-white"
-									: "text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
+									? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+									: "text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 cursor-pointer"
 							}`}>
 							<Icon className='h-4 w-4' />
 							{item.label}
@@ -87,7 +87,7 @@ export default function Navigation() {
 					{/* Logo */}
 					<Link
 						href='/'
-						className='flex items-center gap-2 font-bold text-xl text-emerald-600'>
+						className='flex items-center gap-2 font-bold text-xl text-emerald-600 cursor-pointer'>
 						<div className='bg-emerald-600 p-2 rounded-lg'>
 							<BookOpen className='h-5 w-5 text-white' />
 						</div>
@@ -105,7 +105,7 @@ export default function Navigation() {
 								<DropdownMenuTrigger asChild>
 									<Button
 										variant='ghost'
-										className='relative h-8 w-8 rounded-full'>
+										className='relative h-8 w-8 rounded-full cursor-pointer'>
 										<Avatar className='h-8 w-8'>
 											<AvatarFallback className='bg-emerald-100 text-emerald-600'>
 												{user.name
@@ -152,12 +152,12 @@ export default function Navigation() {
 								<Link href='/login'>
 									<Button
 										variant='ghost'
-										className='text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'>
+										className='text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer'>
 										Login
 									</Button>
 								</Link>
 								<Link href='/signup'>
-									<Button className='bg-emerald-600 hover:bg-emerald-700'>
+									<Button className='bg-emerald-600 hover:bg-emerald-700 cursor-pointer'>
 										Sign Up
 									</Button>
 								</Link>

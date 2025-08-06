@@ -27,11 +27,13 @@ import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import { Book } from "./my-books/page";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
 	const [books, setBooks] = useState<Book[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [loading, setLoading] = useState(true);
+	const router = useRouter();
 
 	useEffect(() => {
 		loadBooks();
@@ -50,6 +52,16 @@ export default function HomePage() {
 	};
 
 	const featuredBooks = books.slice(0, 8);
+
+	const handleSearch = () => {
+		router.push(`/books?search=${searchTerm.trim().toLowerCase()}`);
+	};
+
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if (event.key === "Enter") {
+			handleSearch();
+		}
+	};
 
 	return (
 		<div className='min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50'>
@@ -81,7 +93,8 @@ export default function HomePage() {
 								placeholder='Search for books, authors, or genres...'
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className='pl-12 py-4 text-lg border-0 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg'
+								onKeyDown={handleKeyDown}
+								className='pl-12 py-4 text-lg border-0 text-black bg-white/90 backdrop-blur-sm rounded-xl shadow-lg'
 							/>
 						</div>
 					</div>
@@ -119,72 +132,6 @@ export default function HomePage() {
 				</div>
 			</div>
 
-			{/* Features Section */}
-			<div className='py-20 bg-white'>
-				<div className='container mx-auto px-4'>
-					<div className='text-center mb-16'>
-						<h2 className='text-4xl font-bold text-gray-800 mb-4'>
-							Why Choose Community Library?
-						</h2>
-						<p className='text-xl text-gray-600 max-w-3xl mx-auto'>
-							We make book sharing simple, safe, and rewarding for
-							everyone in the community.
-						</p>
-					</div>
-
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
-						<div className='text-center group'>
-							<div className='bg-emerald-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-emerald-200 transition-colors'>
-								<BookOpen className='h-8 w-8 text-emerald-600' />
-							</div>
-							<h3 className='text-xl font-semibold mb-2'>
-								Easy Sharing
-							</h3>
-							<p className='text-gray-600'>
-								List your books in minutes and connect with
-								readers in your area.
-							</p>
-						</div>
-						<div className='text-center group'>
-							<div className='bg-teal-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-teal-200 transition-colors'>
-								<Shield className='h-8 w-8 text-teal-600' />
-							</div>
-							<h3 className='text-xl font-semibold mb-2'>
-								Safe & Secure
-							</h3>
-							<p className='text-gray-600'>
-								Verified users and secure transactions for peace
-								of mind.
-							</p>
-						</div>
-						<div className='text-center group'>
-							<div className='bg-cyan-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-cyan-200 transition-colors'>
-								<Users className='h-8 w-8 text-cyan-600' />
-							</div>
-							<h3 className='text-xl font-semibold mb-2'>
-								Build Community
-							</h3>
-							<p className='text-gray-600'>
-								Meet like-minded readers and build lasting
-								friendships.
-							</p>
-						</div>
-						<div className='text-center group'>
-							<div className='bg-emerald-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-emerald-200 transition-colors'>
-								<TrendingUp className='h-8 w-8 text-emerald-600' />
-							</div>
-							<h3 className='text-xl font-semibold mb-2'>
-								Track Everything
-							</h3>
-							<p className='text-gray-600'>
-								Monitor your lending history and discover new
-								favorites.
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-
 			{/* Featured Books Section */}
 			<div className='py-20'>
 				<div className='container mx-auto px-4'>
@@ -200,14 +147,14 @@ export default function HomePage() {
 						<Link href='/books'>
 							<Button
 								variant='outline'
-								className='border-emerald-200 text-emerald-600 hover:bg-emerald-50 bg-transparent'>
+								className='border-emerald-200 text-emerald-600 hover:bg-emerald-50 bg-transparent cursor-pointer'>
 								View All Books
 								<ArrowRight className='ml-2 h-4 w-4' />
 							</Button>
 						</Link>
 					</div>
 
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
 						{loading
 							? Array.from({ length: 8 }).map((_, i) => (
 									<Card key={i} className='animate-pulse'>
@@ -292,7 +239,7 @@ export default function HomePage() {
 													href={`/book/${book._id}`}
 													className='block'>
 													<Button
-														className='w-full bg-emerald-600 hover:bg-emerald-700 text-white'
+														className='w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
 														disabled={
 															book.status !==
 															"available"
@@ -311,6 +258,71 @@ export default function HomePage() {
 				</div>
 			</div>
 
+			{/* Features Section */}
+			<div className='py-20 bg-white'>
+				<div className='container mx-auto px-4'>
+					<div className='text-center mb-16'>
+						<h2 className='text-4xl font-bold text-gray-800 mb-4'>
+							Why Choose Community Library?
+						</h2>
+						<p className='text-xl text-gray-600 max-w-3xl mx-auto'>
+							We make book sharing simple, safe, and rewarding for
+							everyone in the community.
+						</p>
+					</div>
+
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+						<div className='text-center group'>
+							<div className='bg-emerald-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-emerald-200 transition-colors'>
+								<BookOpen className='h-8 w-8 text-emerald-600' />
+							</div>
+							<h3 className='text-xl font-semibold mb-2'>
+								Easy Sharing
+							</h3>
+							<p className='text-gray-600'>
+								List your books in minutes and connect with
+								readers in your area.
+							</p>
+						</div>
+						<div className='text-center group'>
+							<div className='bg-teal-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-teal-200 transition-colors'>
+								<Shield className='h-8 w-8 text-teal-600' />
+							</div>
+							<h3 className='text-xl font-semibold mb-2'>
+								Safe & Secure
+							</h3>
+							<p className='text-gray-600'>
+								Verified users and secure transactions for peace
+								of mind.
+							</p>
+						</div>
+						<div className='text-center group'>
+							<div className='bg-cyan-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-cyan-200 transition-colors'>
+								<Users className='h-8 w-8 text-cyan-600' />
+							</div>
+							<h3 className='text-xl font-semibold mb-2'>
+								Build Community
+							</h3>
+							<p className='text-gray-600'>
+								Meet like-minded readers and build lasting
+								friendships.
+							</p>
+						</div>
+						<div className='text-center group'>
+							<div className='bg-emerald-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-emerald-200 transition-colors'>
+								<TrendingUp className='h-8 w-8 text-emerald-600' />
+							</div>
+							<h3 className='text-xl font-semibold mb-2'>
+								Track Everything
+							</h3>
+							<p className='text-gray-600'>
+								Monitor your lending history and discover new
+								favorites.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
 			{/* How It Works Section */}
 			<div className='py-20 bg-white'>
 				<div className='container mx-auto px-4'>
