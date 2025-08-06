@@ -113,7 +113,14 @@ const BooksPage = () => {
 									</CardHeader>
 									<CardContent className='pb-3'>
 										<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
-											<BookOpen className='h-12 w-12 text-emerald-400' />
+											{book.image && book.image !== "" ? (
+												<img
+													className='h-full w-full object-cover'
+													src={book.image}
+												/>
+											) : (
+												<BookOpen className='h-12 w-12 text-emerald-400' />
+											)}
 										</div>
 										<div className='space-y-2'>
 											<Badge
@@ -148,7 +155,7 @@ const BooksPage = () => {
 												href={`/book/${book._id}`}
 												className='block'>
 												<Button
-													className='w-full bg-emerald-600 hover:bg-emerald-700 text-white'
+													className='w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
 													disabled={
 														book.status !==
 														"available"

@@ -122,7 +122,7 @@ export default function BookDetailsPage() {
 					<Button
 						variant='ghost'
 						onClick={() => router.back()}
-						className='mb-6 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'>
+						className='mb-6 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer'>
 						<ArrowLeft className='h-4 w-4 mr-2' />
 						Back
 					</Button>
@@ -157,7 +157,14 @@ export default function BookDetailsPage() {
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
 								{/* Book Cover */}
 								<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center shadow-lg'>
-									<BookOpen className='h-24 w-24 text-emerald-400' />
+									{book.image && book.image !== "" ? (
+										<img
+											className='h-full w-full object-cover'
+											src={book.image}
+										/>
+									) : (
+										<BookOpen className='h-12 w-12 text-emerald-400' />
+									)}
 								</div>
 
 								{/* Book Details */}
@@ -170,7 +177,7 @@ export default function BookDetailsPage() {
 											<div className='flex items-center gap-3'>
 												<Badge
 													variant='outline'
-													className='text-sm'>
+													className='text-sm cursor-pointer'>
 													{book.genre}
 												</Badge>
 												<span className='text-sm text-gray-600'>

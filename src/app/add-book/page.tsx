@@ -29,7 +29,7 @@ export default function AddBookPage() {
 		author: "",
 		genre: "",
 		isbn: "",
-		image: "",
+		image: null,
 		description: "",
 		condition: "",
 		address: "",
@@ -60,10 +60,24 @@ export default function AddBookPage() {
 		e.preventDefault();
 		setLoading(true);
 
+		const formDataToSend = new FormData();
+		formDataToSend.append('title', formData.title);
+		formDataToSend.append('author', formData.author);
+		formDataToSend.append('isbn', formData.isbn);
+		formDataToSend.append('genre', formData.genre);
+		formDataToSend.append('description', formData.description);
+		formDataToSend.append('condition', formData.condition);
+		formDataToSend.append('address', formData.address);
+		if (formData.image) {
+			formDataToSend.append('image', formData.image);
+		}
+
 		try {
-			setLoading(true);
-			const res = await axios.post("/api/books", formData);
-			console.log(res.data);
+			const res = await axios.post("/api/books", formDataToSend, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			});
 			if (res.data.success) {
 				setLoading(false);
 				toast("Your book has been added to the community library.");
@@ -83,8 +97,14 @@ export default function AddBookPage() {
 		}
 	};
 
-	const handleChange = (field: string, value: string) => {
+	const handleChange = (field: string, value: string | File) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
+	};
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files && e.target.files[0]) {
+			handleChange('image', e.target.files[0]);
+		}
 	};
 
 	return (
@@ -242,14 +262,8 @@ export default function AddBookPage() {
 										<Input
 											id='image'
 											type='file'
-											value={formData.image}
-											onChange={(e) =>
-												handleChange(
-													"image",
-													e.target.value
-												)
-											}
-											placeholder='Enter your name'
+											accept='image/*'
+											onChange={handleImageChange}
 											required
 											className='border-emerald-200 focus:border-emerald-500'
 										/>

@@ -51,7 +51,7 @@ export default function HomePage() {
 		}
 	};
 
-	const featuredBooks = books.slice(0, 8);
+	const featuredBooks = books.slice(0, 3);
 
 	const handleSearch = () => {
 		router.push(`/books?search=${searchTerm.trim().toLowerCase()}`);
@@ -202,7 +202,14 @@ export default function HomePage() {
 										</CardHeader>
 										<CardContent className='pb-3'>
 											<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
-												<BookOpen className='h-12 w-12 text-emerald-400' />
+												{book.image ? (
+													<img
+														className='h-full w-full object-cover'
+														src={book.image}
+													/>
+												) : (
+													<BookOpen className='h-12 w-12 text-emerald-400' />
+												)}
 											</div>
 											<div className='space-y-2'>
 												<Badge

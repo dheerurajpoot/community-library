@@ -44,27 +44,32 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	try {
 		await connectDb();
-
-		const {
-			title,
-			author,
-			genre,
-			description = "",
-			condition,
-			address,
-			isbn,
-			image,
-		} = await request.json();
-
-		const token = request.cookies.get("token")?.value;
-		const decoded = token && verifyToken(token);
-
-		if (!decoded) {
+		const token = request.cookies.get("token");
+		if (!token) {
 			return NextResponse.json(
-				{ message: "Unauthorized access", success: false },
+				{ message: "Authorization token required", success: false },
 				{ status: 401 }
 			);
 		}
+
+		const decoded = verifyToken(token.value);
+		if (!decoded) {
+			return NextResponse.json(
+				{ message: "Invalid or expired token", success: false },
+				{ status: 401 }
+			);
+		}
+
+		// Parse multipart form data
+		const formData = await request.formData();
+		const title = formData.get("title") as string;
+		const author = formData.get("author") as string;
+		const isbn = formData.get("isbn") as string;
+		const genre = formData.get("genre") as string;
+		const description = formData.get("description") as string;
+		const condition = formData.get("condition") as string;
+		const address = formData.get("address") as string;
+		const image = formData.get("image") as File;
 
 		// Required fields validation
 		const requiredFields = { title, author, genre, address, isbn, image };
@@ -77,17 +82,16 @@ export async function POST(request: NextRequest) {
 			}
 		}
 
-		console.log("Image:", image);
+		// Convert file to Buffer for Cloudinary
+		const buffer = Buffer.from(await image.arrayBuffer());
 
-		const imageUrl = await uploadImage(image);
+		const imageUrl = await uploadImage(buffer);
 		if (!imageUrl) {
 			return NextResponse.json(
 				{ message: "Failed to upload image", success: false },
 				{ status: 500 }
 			);
 		}
-		console.log("Image URL:", imageUrl);
-
 		const newBook = await Book.create({
 			title,
 			author,
@@ -96,24 +100,20 @@ export async function POST(request: NextRequest) {
 			genre,
 			description,
 			condition,
-			owner: decoded.userId,
 			address,
+			owner: decoded.userId,
 			status: "available",
-			createdAt: new Date(),
 		});
 
-		return NextResponse.json(
-			{
-				savedBook: newBook,
-				success: true,
-				message: "Book created successfully",
-			},
-			{ status: 201 }
-		);
+		return NextResponse.json({
+			book: newBook,
+			success: true,
+			message: "Book added successfully",
+		});
 	} catch (error) {
-		console.error("POST /api/books error:", error);
+		console.error("Error adding book:", error);
 		return NextResponse.json(
-			{ message: "Failed to create book", success: false },
+			{ message: "Failed to add book", success: false },
 			{ status: 500 }
 		);
 	}

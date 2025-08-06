@@ -31,13 +31,12 @@ export async function uploadImage(input: string | Buffer): Promise<string> {
 			console.error(
 				"Cloudinary is not configured, using placeholder URL"
 			);
-			return "https://via.placeholder.com/1200x1200?text=Book+Image";
+			return "";
 		}
 
 		let result;
 
 		if (Buffer.isBuffer(input)) {
-			// If input is a Buffer, convert it to base64 with data URI prefix
 			const base64Data = `data:image/png;base64,${input.toString(
 				"base64"
 			)}`;
@@ -46,13 +45,15 @@ export async function uploadImage(input: string | Buffer): Promise<string> {
 				resource_type: "auto",
 			});
 		} else if (input.startsWith("data:")) {
-			// If it's a data URL, upload it directly
 			result = await cloudinary.uploader.upload(input, {
 				folder: "books",
 				resource_type: "auto",
 			});
 		} else {
-			// If it's an HTTPS URL, upload it using the URL
+			result = await cloudinary.uploader.upload(input, {
+				folder: "books",
+				resource_type: "auto",
+			});
 			result = await cloudinary.uploader.upload(input, {
 				folder: "books",
 				resource_type: "auto",
@@ -66,14 +67,11 @@ export async function uploadImage(input: string | Buffer): Promise<string> {
 		return result.secure_url;
 	} catch (error) {
 		console.error("Error uploading image to Cloudinary:", error);
-		// Return a placeholder URL if upload fails
-		return "https://via.placeholder.com/1200x1200?text=Book+Image";
+		return "";
 	}
 }
 
-// We don't need cleanup anymore as Cloudinary handles that
 export function cleanupImage(): void {
-	// No-op as Cloudinary handles cleanup
 }
 
 export function getAbsoluteUrl(publicUrl: string): string {
