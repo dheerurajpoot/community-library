@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 			borrower: decoded.userId,
 		})
 			.populate("book")
-			.populate("borrower");
+			.populate("owner");
 
 		return NextResponse.json(
 			{
@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
 			{ status: 201 }
 		);
 	} catch (error) {
+		console.error("Failed to borrow book:", error);
 		return NextResponse.json(
 			{ message: "Failed to borrow book", success: false },
 			{ status: 500 }

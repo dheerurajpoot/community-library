@@ -26,6 +26,11 @@ interface BorrowTransaction {
 		owner: string;
 		address: string;
 	};
+	owner: {
+		_id: string;
+		name: string;
+		address: string;
+	};
 	borrowDate: string;
 	returnDate: string;
 	status: string;
@@ -42,7 +47,6 @@ export default function BorrowedBooksPage() {
 	const loadBorrowedBooks = async () => {
 		try {
 			const res = await axios.get("/api/borrow");
-			console.log(res.data.transactions);
 			setTransactions(
 				Array.isArray(res.data.transactions)
 					? res.data.transactions
@@ -191,13 +195,13 @@ export default function BorrowedBooksPage() {
 												<div className='flex items-center gap-1'>
 													<Avatar className='h-5 w-5'>
 														<AvatarFallback className='text-xs bg-emerald-100 text-emerald-600'>
-															{transaction.book.owner
+															{transaction.owner.name
 																.charAt(0)
 																.toUpperCase()}
 														</AvatarFallback>
 													</Avatar>
 													<span>
-														{transaction.book.owner}
+														{transaction.owner.name}
 													</span>
 												</div>
 											</div>

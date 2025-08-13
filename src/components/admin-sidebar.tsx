@@ -20,8 +20,10 @@ import {
 	Menu,
 	X,
 	Shield,
+	ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface AdminSidebarProps {
 	className?: string;
@@ -30,6 +32,7 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ className }: AdminSidebarProps) {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const pathname = usePathname();
+	const router = useRouter();
 	const { user, signOut } = useAuth();
 
 	const navItems = [
@@ -41,7 +44,7 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
 
 	const handleLogout = () => {
 		signOut();
-		window.location.href = "/admin/login";
+		window.location.href = "/login";
 	};
 
 	return (
@@ -103,23 +106,22 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
 					})}
 				</ul>
 			</nav>
+			<Button
+				variant='ghost'
+				onClick={() => router.push("/")}
+				className={`w-full justify-start gap-3 my-4 text-slate-300 hover:text-white hover:bg-slate-800 ${
+					isCollapsed ? "px-2" : "px-3"
+				}`}>
+				{!isCollapsed && (
+					<div className='flex items-center mx-4'>
+						<ArrowLeft className='h-4 w-4 mr-2' />
+						<span className='text-sm font-medium'>
+							Back to Home
+						</span>
+					</div>
+				)}
+			</Button>
 			<div className='p-4 border-t border-slate-700'>
-				<Button
-					variant='ghost'
-					className={`w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800 ${
-						isCollapsed ? "px-2" : "px-3"
-					}`}>
-					{!isCollapsed && (
-						<div className='flex flex-col items-start'>
-							<span className='text-sm font-medium'>
-								{user?.name}
-							</span>
-							<span className='text-xs text-slate-400 capitalize'>
-								{user?.role.replace("_", " ")}
-							</span>
-						</div>
-					)}
-				</Button>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button

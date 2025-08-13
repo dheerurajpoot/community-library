@@ -14,10 +14,12 @@ import { Book } from "@/app/my-books/page";
 import axios from "axios";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function BookDetailsPage() {
 	const params = useParams();
 	const router = useRouter();
+	const { user } = useAuth();
 	const [book, setBook] = useState<Book | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [borrowing, setBorrowing] = useState(false);
@@ -43,6 +45,11 @@ export default function BookDetailsPage() {
 
 	const handleBorrow = async () => {
 		if (!book) return;
+		if (!user) {
+			router.push("/login");
+			toast("Please login to borrow a book.");
+			return;
+		}
 
 		setBorrowing(true);
 		try {

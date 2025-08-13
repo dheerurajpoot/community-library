@@ -20,7 +20,7 @@ const bookSchema = new mongoose.Schema(
 			enum: ["available", "borrowed"],
 			required: true,
 		},
-		image: { type: String, required: true },
+		image: { type: String },
 	},
 	{
 		timestamps: true,

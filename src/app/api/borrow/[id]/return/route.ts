@@ -6,14 +6,13 @@ import { connectDb } from "@/lib/database";
 function extractIdFromRequest(request: NextRequest) {
 	const url = new URL(request.url, process.env.NEXT_PUBLIC_APP_URL);
 	const pathParts = url.pathname.split("/");
-	return pathParts[pathParts.length - 1];
+	return pathParts[pathParts.length - 2];
 }
 
 export async function PUT(request: NextRequest) {
 	try {
 		await connectDb();
 		const transactionId = extractIdFromRequest(request);
-		console.log("Transaction ID:", transactionId);
 		const transaction = await BorrowTransaction.findById(transactionId);
 
 		if (!transaction) {
@@ -52,6 +51,7 @@ export async function PUT(request: NextRequest) {
 			{ status: 200 }
 		);
 	} catch (error) {
+		console.error("Failed to return book:", error);
 		return NextResponse.json(
 			{
 				message: "Failed to return book",
