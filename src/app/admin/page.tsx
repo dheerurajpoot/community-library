@@ -72,8 +72,8 @@ export default function AdminDashboard() {
 						Dashboard
 					</h1>
 					<p className='text-gray-600'>
-						Welcome back, {user?.name}! Here's what's happening in
-						your community library.
+						Welcome back, {user?.name}! Here&apos;s what&apos;s
+						happening in your community library.
 					</p>
 				</div>
 
