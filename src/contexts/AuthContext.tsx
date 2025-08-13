@@ -21,7 +21,8 @@ export interface User {
 	zipCode: string;
 	role: "user" | "admin";
 	token?: string;
-	isBlocked: boolean;
+	isActive: string;
+	isEmailVerified: boolean;
 	createdAt: string;
 }
 

@@ -27,8 +27,9 @@ const userSchema = new mongoose.Schema(
 			default: "user",
 		},
 		isActive: {
-			type: Boolean,
-			default: false,
+			type: String,
+			enum: ["active", "blocked", "deleted"],
+			default: "active",
 		},
 		isEmailVerified: {
 			type: Boolean,

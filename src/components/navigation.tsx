@@ -29,7 +29,7 @@ export default function Navigation() {
 	const [isOpen, setIsOpen] = useState(false);
 	const pathname = usePathname();
 	const router = useRouter();
-	const { user, signOut } = useAuth();
+	const { user, isAdmin, signOut } = useAuth();
 
 	const navItems = [
 		{ href: "/", label: "Home", icon: Home },
@@ -138,6 +138,17 @@ export default function Navigation() {
 											Profile
 										</Link>
 									</DropdownMenuItem>
+									<DropdownMenuSeparator />
+									{isAdmin() && (
+										<DropdownMenuItem asChild>
+											<Link
+												href='/admin'
+												className='cursor-pointer'>
+												<User className='mr-2 h-4 w-4' />
+												Admin
+											</Link>
+										</DropdownMenuItem>
+									)}
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
 										onClick={handleLogout}
