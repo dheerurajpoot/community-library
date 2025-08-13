@@ -44,3 +44,12 @@ export function generateResetToken(): string {
 		Math.random().toString(36).substring(2, 15)
 	);
 }
+
+export function formatDate(date: string): string {
+	const d = new Date(date);
+	return d.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+}

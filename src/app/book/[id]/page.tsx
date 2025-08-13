@@ -51,16 +51,20 @@ export default function BookDetailsPage() {
 			return;
 		}
 
-		setBorrowing(true);
 		try {
-			await axios.post("/api/borrow", {
+			setBorrowing(true);
+			const res = await axios.post("/api/borrow", {
 				bookId: book._id,
 				returnDate,
 			});
-			toast(
-				"Book borrowed successfully! Contact the owner to arrange pickup."
-			);
+			if (res.data.success) {
+				setBorrowing(false);
+				toast(
+					"Book borrowed successfully! Contact the owner to arrange pickup."
+				);
+			}
 		} catch (error) {
+			setBorrowing(false);
 			if (axios.isAxiosError(error)) {
 				console.error("Failed to borrow book:", error);
 				toast.error(

@@ -18,7 +18,7 @@ const borrowTransactionSchema = new mongoose.Schema(
 			required: true,
 		},
 		borrowDate: { type: Date, required: true },
-		returnDate: { type: Date },
+		returnDate: { type: Date, required: true },
 		status: {
 			type: String,
 			enum: ["borrowed", "returned", "overdue"],

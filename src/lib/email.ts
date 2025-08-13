@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { companyEmail } from "./constant";
 
 const transporter = nodemailer.createTransport({
 	host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -117,8 +118,9 @@ export function generateBorrowRequestEmailToOwner(
 	bookAuthor: string,
 	borrowerEmail: string,
 	borrowerPhone: string,
+	address: string,
 	borrowDate: string,
-	dueDate: string
+	returnDate: string
 ): string {
 	return `
     <!DOCTYPE html>
@@ -150,10 +152,10 @@ export function generateBorrowRequestEmailToOwner(
         </div>
 
         <div style="background: white; border-left: 4px solid #06b6d4; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-          <h3 style="margin: 0 0 15px 0; color: #06b6d4;">📅 Loan Details</h3>
+          <h3 style="margin: 0 0 15px 0; color: #06b6d4;">📅 Borrow Details</h3>
           <p style="margin: 5px 0;"><strong>Borrow Date:</strong> ${borrowDate}</p>
-          <p style="margin: 5px 0;"><strong>Expected Return:</strong> ${dueDate}</p>
-          <p style="margin: 5px 0;"><strong>Loan Duration:</strong> 14 days</p>
+          <p style="margin: 5px 0;"><strong>Expected Return:</strong> ${returnDate}</p>
+          <p style="margin: 5px 0;"><strong>Address:</strong> ${address}</p>
         </div>
 
         <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -186,7 +188,7 @@ export function generateBorrowRequestEmailToOwner(
         
         <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">
           This email was sent because someone requested to borrow your book on Community Library. 
-          If you have any questions, please contact us at <a href="mailto:support@communitylibrary.com" style="color: #059669;">support@communitylibrary.com</a>
+          If you have any questions, please contact us at <a href="mailto:${companyEmail}" style="color: #059669;">${companyEmail}</a>
         </p>
       </div>
     </body>
@@ -201,10 +203,10 @@ export function generateBorrowConfirmationEmailToBorrower(
 	ownerName: string,
 	ownerEmail: string,
 	ownerPhone: string,
+	bookLocation: string,
 	borrowDate: string,
-	dueDate: string,
-	bookCondition: string,
-	bookLocation: string
+	returnDate: string,
+	bookCondition: string
 ): string {
 	return `
     <!DOCTYPE html>
@@ -244,8 +246,7 @@ export function generateBorrowConfirmationEmailToBorrower(
         <div style="background: white; border-left: 4px solid #06b6d4; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
           <h3 style="margin: 0 0 15px 0; color: #06b6d4;">📅 Important Dates</h3>
           <p style="margin: 5px 0;"><strong>Borrow Date:</strong> ${borrowDate}</p>
-          <p style="margin: 5px 0;"><strong>Return By:</strong> <span style="color: #dc2626; font-weight: bold;">${dueDate}</span></p>
-          <p style="margin: 5px 0;"><strong>Loan Duration:</strong> 14 days</p>
+          <p style="margin: 5px 0;"><strong>Return By:</strong> <span style="color: #dc2626; font-weight: bold;">${returnDate}</span></p>
         </div>
 
         <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -266,16 +267,14 @@ export function generateBorrowConfirmationEmailToBorrower(
 
         <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
           <p style="margin: 0; color: #92400e; font-size: 14px;">
-            <strong>⏰ Reminder:</strong> Please return the book by ${dueDate}. Late returns may affect your borrowing privileges.
+            <strong>⏰ Reminder:</strong> Please return the book by ${returnDate}. Late returns may affect your borrowing privileges.
           </p>
         </div>
 
         <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin: 0 0 10px 0; color: #0277bd;">📱 Manage Your Loan</h3>
+          <h3 style="margin: 0 0 10px 0; color: #0277bd;">📱 Manage Your Borrowed Books</h3>
           <p style="margin: 0; color: #0277bd;">
-            Visit your <a href="${
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-			}/borrowed" style="color: #0277bd; font-weight: bold;">borrowed books page</a> to track this loan and manage your returns.
+            Visit your <a href="${process.env.NEXT_PUBLIC_APP_URL}/borrowed" style="color: #0277bd; font-weight: bold;">borrowed books page</a> to track this borrow request and manage your returns.
           </p>
         </div>
 
@@ -288,7 +287,7 @@ export function generateBorrowConfirmationEmailToBorrower(
         
         <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">
           This email confirms your book borrow request on Community Library. 
-          If you have any questions, please contact us at <a href="mailto:support@communitylibrary.com" style="color: #059669;">support@communitylibrary.com</a>
+          If you have any questions, please contact us at <a href="mailto:${companyEmail}" style="color: #059669;">${companyEmail}</a>
         </p>
       </div>
     </body>
@@ -300,8 +299,8 @@ export function generateBookReturnEmailToOwner(
 	borrowerName: string,
 	bookTitle: string,
 	bookAuthor: string,
-	returnDate: string,
-	borrowDuration: string
+	borrowDate: string,
+	returnDate: string
 ): string {
 	return `
     <!DOCTYPE html>
@@ -331,9 +330,9 @@ export function generateBookReturnEmailToOwner(
         </div>
 
         <div style="background: white; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-          <h3 style="margin: 0 0 15px 0; color: #10b981;">📅 Loan Summary</h3>
+          <h3 style="margin: 0 0 15px 0; color: #10b981;">📅 Borrow Summary</h3>
+          <p style="margin: 5px 0;"><strong>Borrow Date:</strong> ${borrowDate}</p>
           <p style="margin: 5px 0;"><strong>Return Date:</strong> ${returnDate}</p>
-          <p style="margin: 5px 0;"><strong>Loan Duration:</strong> ${borrowDuration}</p>
           <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #10b981; font-weight: bold;">✅ Completed</span></p>
         </div>
 
@@ -348,12 +347,8 @@ export function generateBookReturnEmailToOwner(
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-			}/my-books" style="background: #059669; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📚 View My Books</a>
-          <a href="${
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-			}" style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">🔍 Browse Books</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/my-books" style="background: #059669; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📚 View My Books</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/books" style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">🔍 Browse Books</a>
         </div>
 
         <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -372,7 +367,7 @@ export function generateBookReturnEmailToOwner(
         
         <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">
           This email confirms that your book has been returned on Community Library. 
-          If you have any questions, please contact us at <a href="mailto:support@communitylibrary.com" style="color: #059669;">support@communitylibrary.com</a>
+          If you have any questions, please contact us at <a href="mailto:${companyEmail}" style="color: #059669;">${companyEmail}</a>
         </p>
       </div>
     </body>
@@ -385,8 +380,8 @@ export function generateBookReturnConfirmationToBorrower(
 	bookTitle: string,
 	bookAuthor: string,
 	ownerName: string,
-	returnDate: string,
-	borrowDuration: string
+	borrowDate: string,
+	returnDate: string
 ): string {
 	return `
     <!DOCTYPE html>
@@ -416,9 +411,9 @@ export function generateBookReturnConfirmationToBorrower(
         </div>
 
         <div style="background: white; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-          <h3 style="margin: 0 0 15px 0; color: #10b981;">📅 Loan Summary</h3>
+          <h3 style="margin: 0 0 15px 0; color: #10b981;">📅 Borrow Summary</h3>
+          <p style="margin: 5px 0;"><strong>Borrow Date:</strong> ${borrowDate}</p>
           <p style="margin: 5px 0;"><strong>Return Date:</strong> ${returnDate}</p>
-          <p style="margin: 5px 0;"><strong>Total Duration:</strong> ${borrowDuration}</p>
           <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #10b981; font-weight: bold;">✅ Successfully Returned</span></p>
         </div>
 
@@ -439,12 +434,8 @@ export function generateBookReturnConfirmationToBorrower(
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-			}" style="background: #059669; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📚 Browse More Books</a>
-          <a href="${
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-			}/borrowed" style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📖 My Borrowed Books</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/books" style="background: #059669; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📚 Browse More Books</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/borrowed" style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 0 10px 10px 0;">📖 My Borrowed Books</a>
         </div>
 
         <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -463,7 +454,7 @@ export function generateBookReturnConfirmationToBorrower(
         
         <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">
           This email confirms your book return on Community Library. 
-          If you have any questions, please contact us at <a href="mailto:support@communitylibrary.com" style="color: #059669;">support@communitylibrary.com</a>
+          If you have any questions, please contact us at <a href="mailto:${companyEmail}" style="color: #059669;">${companyEmail}</a>
         </p>
       </div>
     </body>

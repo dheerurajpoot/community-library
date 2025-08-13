@@ -3,6 +3,13 @@ import BorrowTransaction from "@/models/BorrowTransaction";
 import Book from "@/models/Book";
 import { verifyToken } from "@/lib/utils";
 import { connectDb } from "@/lib/database";
+import {
+	generateBorrowRequestEmailToOwner,
+	generateBorrowConfirmationEmailToBorrower,
+	sendEmail,
+} from "@/lib/email";
+import { formatDate } from "@/lib/utils";
+import User from "@/models/User";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -66,6 +73,7 @@ export async function POST(request: NextRequest) {
 		}
 		const { bookId, returnDate } = await request.json();
 		const borrower = decoded.userId;
+		const borrowerUser = await User.findById(borrower);
 
 		if (!bookId || !borrower || !returnDate) {
 			return NextResponse.json(
@@ -75,7 +83,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		// Find the book
-		const book = await Book.findById(bookId);
+		const book = await Book.findById(bookId).populate("owner");
 		if (!book) {
 			return NextResponse.json(
 				{ message: "Book not found", success: false },
@@ -102,6 +110,63 @@ export async function POST(request: NextRequest) {
 			returnDate,
 			status: "borrowed",
 		});
+
+		const borrowDate = new Date().toISOString();
+
+		// Send email to book owner
+
+		const emailHtml = generateBorrowRequestEmailToOwner(
+			borrowerUser.name,
+			book.title,
+			book.author,
+			borrowerUser.email,
+			borrowerUser.phone,
+			book.address,
+			formatDate(borrowDate),
+			formatDate(returnDate)
+		);
+		const res = await sendEmail({
+			to: book.owner.email,
+			subject: "Someone wants to borrow your book - Community Library",
+			html: emailHtml,
+		});
+		if (!res.success) {
+			return NextResponse.json(
+				{
+					message: "Failed to send email to owner",
+					success: false,
+				},
+				{ status: 500 }
+			);
+		}
+
+		// Send confirmation email to borrower
+		const emailHtml2 = generateBorrowConfirmationEmailToBorrower(
+			borrowerUser.name,
+			book.title,
+			book.author,
+			book.owner.name,
+			book.owner.email,
+			book.owner.phone,
+			book.address,
+			formatDate(borrowDate),
+			formatDate(returnDate),
+			book.condition
+		);
+		const res2 = await sendEmail({
+			to: borrowerUser.email,
+			subject: "Borrow request confirmed - Community Library",
+			html: emailHtml2,
+		});
+		if (!res2.success) {
+			return NextResponse.json(
+				{
+					message: "Failed to send email to borrower",
+					success: false,
+				},
+				{ status: 500 }
+			);
+		}
 
 		await newTransaction.save();
 
