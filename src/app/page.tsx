@@ -51,7 +51,7 @@ export default function HomePage() {
 		}
 	};
 
-	const featuredBooks = books.slice(0, 3);
+	const featuredBooks = books.slice(0, 4);
 
 	const handleSearch = () => {
 		router.push(`/books?search=${searchTerm.trim().toLowerCase()}`);
@@ -75,7 +75,7 @@ export default function HomePage() {
 							<BookOpen className='h-16 w-16' />
 						</div>
 					</div>
-					<h1 className='text-5xl md:text-7xl font-bold mb-6'>
+					<h1 className='text-4xl md:text-7xl font-bold mb-6'>
 						Community Library
 					</h1>
 					<p className='text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto'>
@@ -94,7 +94,7 @@ export default function HomePage() {
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								onKeyDown={handleKeyDown}
-								className='pl-12 py-4 text-lg border-0 text-black bg-white/90 backdrop-blur-sm rounded-xl shadow-lg'
+								className='pl-12 py-5 text-lg border-0 text-black bg-white/90 backdrop-blur-sm rounded-xl shadow-lg'
 							/>
 						</div>
 					</div>
@@ -137,7 +137,7 @@ export default function HomePage() {
 				<div className='container mx-auto px-4'>
 					<div className='flex items-center justify-between mb-12'>
 						<div>
-							<h2 className='text-4xl font-bold text-gray-800 mb-2'>
+							<h2 className='md:text-4xl text-2xl font-bold text-gray-800 mb-2'>
 								Featured Books
 							</h2>
 							<p className='text-gray-600'>
@@ -154,9 +154,9 @@ export default function HomePage() {
 						</Link>
 					</div>
 
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+					<div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6'>
 						{loading
-							? Array.from({ length: 8 }).map((_, i) => (
+							? Array.from({ length: 4 }).map((_, i) => (
 									<Card key={i} className='animate-pulse'>
 										<CardHeader>
 											<div className='h-4 bg-gray-200 rounded w-3/4'></div>
@@ -201,7 +201,7 @@ export default function HomePage() {
 											</div>
 										</CardHeader>
 										<CardContent className='pb-3'>
-											<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
+											<div className='aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
 												{book.image ? (
 													<img
 														className='h-full w-full object-cover'
@@ -269,7 +269,7 @@ export default function HomePage() {
 			<div className='py-20 bg-white'>
 				<div className='container mx-auto px-4'>
 					<div className='text-center mb-16'>
-						<h2 className='text-4xl font-bold text-gray-800 mb-4'>
+						<h2 className='md:text-4xl text-3xl font-bold text-gray-800 mb-4'>
 							Why Choose Community Library?
 						</h2>
 						<p className='text-xl text-gray-600 max-w-3xl mx-auto'>

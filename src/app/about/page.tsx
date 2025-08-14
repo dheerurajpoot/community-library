@@ -16,7 +16,7 @@ export default function AboutPage() {
 							<BookOpen className='h-16 w-16' />
 						</div>
 					</div>
-					<h1 className='text-5xl md:text-6xl font-bold mb-6'>
+					<h1 className='text-4xl md:text-6xl font-bold mb-6'>
 						About Community Library
 					</h1>
 					<p className='text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto'>
@@ -30,7 +30,7 @@ export default function AboutPage() {
 				{/* Mission Section */}
 				<div className='max-w-4xl mx-auto mb-20'>
 					<div className='text-center mb-12'>
-						<h2 className='text-4xl font-bold text-gray-800 mb-4'>
+						<h2 className='md:text-4xl text-2xl font-bold text-gray-800 mb-4'>
 							Our Mission
 						</h2>
 						<p className='text-xl text-gray-600'>
@@ -200,16 +200,16 @@ export default function AboutPage() {
 						</p>
 					</div>
 
-					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
 						<Card className='text-center shadow-lg border-0 bg-white/80 backdrop-blur-sm'>
 							<CardContent className='pt-8 pb-6'>
 								<div className='bg-emerald-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center'>
 									<span className='text-2xl font-bold text-emerald-600'>
-										JS
+										AS
 									</span>
 								</div>
 								<h3 className='text-xl font-semibold mb-1'>
-									Jane Smith
+									Aditya Singh
 								</h3>
 								<p className='text-emerald-600 mb-2'>
 									Founder & CEO
@@ -225,36 +225,16 @@ export default function AboutPage() {
 							<CardContent className='pt-8 pb-6'>
 								<div className='bg-teal-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center'>
 									<span className='text-2xl font-bold text-teal-600'>
-										MD
+										DR
 									</span>
 								</div>
 								<h3 className='text-xl font-semibold mb-1'>
-									Mike Davis
+									Dheeru Rajpoot
 								</h3>
 								<p className='text-teal-600 mb-2'>CTO</p>
 								<p className='text-gray-600 text-sm'>
 									Tech enthusiast building the platform that
 									connects book lovers.
-								</p>
-							</CardContent>
-						</Card>
-
-						<Card className='text-center shadow-lg border-0 bg-white/80 backdrop-blur-sm'>
-							<CardContent className='pt-8 pb-6'>
-								<div className='bg-cyan-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center'>
-									<span className='text-2xl font-bold text-cyan-600'>
-										SJ
-									</span>
-								</div>
-								<h3 className='text-xl font-semibold mb-1'>
-									Sarah Johnson
-								</h3>
-								<p className='text-cyan-600 mb-2'>
-									Community Manager
-								</p>
-								<p className='text-gray-600 text-sm'>
-									Building and nurturing our growing community
-									of readers.
 								</p>
 							</CardContent>
 						</Card>

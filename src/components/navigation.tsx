@@ -22,6 +22,7 @@ import {
 	Home,
 	User,
 	LogOut,
+	Shield,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,6 +34,7 @@ export default function Navigation() {
 
 	const navItems = [
 		{ href: "/", label: "Home", icon: Home },
+		{ href: "/books", label: "Books", icon: BookOpen },
 		{ href: "/add-book", label: "Add Book", icon: Plus, protected: true },
 		{
 			href: "/my-books",
@@ -144,8 +146,8 @@ export default function Navigation() {
 											<Link
 												href='/admin'
 												className='cursor-pointer'>
-												<User className='mr-2 h-4 w-4' />
-												Admin
+												<Shield className='mr-2 h-4 w-4' />
+												Admin Panel
 											</Link>
 										</DropdownMenuItem>
 									)}

@@ -25,6 +25,7 @@ interface BorrowTransaction {
 		author: string;
 		owner: string;
 		address: string;
+		image: string;
 	};
 	owner: {
 		_id: string;
@@ -39,6 +40,7 @@ interface BorrowTransaction {
 export default function BorrowedBooksPage() {
 	const [transactions, setTransactions] = useState<BorrowTransaction[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [returning, setReturning] = useState(false);
 
 	useEffect(() => {
 		loadBorrowedBooks();
@@ -62,22 +64,19 @@ export default function BorrowedBooksPage() {
 
 	const handleReturn = async (transactionId: string) => {
 		try {
-			await axios.put(`/api/borrow/${transactionId}/return`);
-			setTransactions(
-				transactions.map((t) =>
-					t._id === transactionId
-						? {
-								...t,
-								status: "returned",
-								returnDate: new Date().toISOString(),
-						  }
-						: t
-				)
-			);
-			toast("Book marked as returned.");
+			setReturning(true);
+			const res = await axios.put(`/api/borrow/${transactionId}/return`);
+			if (res.data.success) {
+				loadBorrowedBooks();
+				setReturning(false);
+				toast("Book marked as returned.");
+			}
 		} catch (error) {
+			setReturning(false);
 			console.error("Failed to return book:", error);
 			toast("Failed to return book. Please try again.");
+		} finally {
+			setReturning(false);
 		}
 	};
 
@@ -140,7 +139,7 @@ export default function BorrowedBooksPage() {
 						</Button>
 					</div>
 				) : (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+					<div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6'>
 						{transactions.map((transaction) => {
 							const overdueDays =
 								transaction.status === "borrowed"
@@ -155,7 +154,11 @@ export default function BorrowedBooksPage() {
 										<div className='flex items-start justify-between'>
 											<div className='flex-1'>
 												<CardTitle className='text-lg font-bold text-gray-800 line-clamp-2'>
-													{transaction.book.title}
+													<Link
+														href={`/book/${transaction.book._id}`}
+														className='hover:text-emerald-600 hover:underline transition-colors'>
+														{transaction.book.title}
+													</Link>
 												</CardTitle>
 												<p className='text-sm text-gray-600 mt-1'>
 													by {transaction.book.author}
@@ -185,8 +188,18 @@ export default function BorrowedBooksPage() {
 										</div>
 									</CardHeader>
 									<CardContent className='pb-3'>
-										<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
-											<BookOpen className='h-12 w-12 text-emerald-400' />
+										<div className='aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
+											{transaction?.book?.image &&
+											transaction?.book?.image !== "" ? (
+												<img
+													className='h-full w-full object-cover'
+													src={
+														transaction.book?.image
+													}
+												/>
+											) : (
+												<BookOpen className='h-12 w-12 text-emerald-400' />
+											)}
 										</div>
 										<div className='space-y-3'>
 											<div className='flex items-center gap-2 text-sm text-gray-600'>
@@ -241,8 +254,11 @@ export default function BorrowedBooksPage() {
 														transaction._id
 													)
 												}
-												className='w-full bg-emerald-600 hover:bg-emerald-700'>
-												Mark as Returned
+												className='w-full bg-emerald-600 hover:bg-emerald-700'
+												disabled={returning}>
+												{returning
+													? "Returning..."
+													: "Mark as Returned"}
 											</Button>
 										) : (
 											<Button

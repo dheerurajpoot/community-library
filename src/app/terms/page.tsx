@@ -32,7 +32,7 @@ export default function TermsOfServicePage() {
 						book-sharing platform.
 					</p>
 					<p className='text-sm opacity-75 mt-4'>
-						Last updated: January 15, 2024
+						Last updated: August 14, 2025
 					</p>
 				</div>
 			</div>

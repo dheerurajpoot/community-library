@@ -62,9 +62,11 @@ export default function MyBooksPage() {
 		if (!confirm("Are you sure you want to delete this book?")) return;
 
 		try {
-			await axios.delete(`/api/books/${bookId}`);
-			setBooks(books.filter((book) => book._id !== bookId));
-			toast("Book deleted successfully.");
+			const res = await axios.delete(`/api/books/${bookId}`);
+			if (res.data.success) {
+				loadMyBooks();
+				toast("Book deleted successfully.");
+			}
 		} catch (error) {
 			toast("Failed to delete book. Please try again.");
 		}
@@ -118,7 +120,7 @@ export default function MyBooksPage() {
 						</Link>
 					</div>
 				) : (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+					<div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6'>
 						{books?.map((book) => (
 							<Card
 								key={book._id}
@@ -127,7 +129,11 @@ export default function MyBooksPage() {
 									<div className='flex items-start justify-between'>
 										<div className='flex-1'>
 											<CardTitle className='text-lg font-bold text-gray-800 line-clamp-2'>
-												{book.title}
+												<Link
+													href={`/book/${book._id}`}
+													className='hover:text-emerald-600 hover:underline transition-colors'>
+													{book.title}
+												</Link>
 											</CardTitle>
 											<p className='text-sm text-gray-600 mt-1'>
 												by {book.author}
@@ -149,8 +155,15 @@ export default function MyBooksPage() {
 									</div>
 								</CardHeader>
 								<CardContent className='pb-3'>
-									<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
-										<BookOpen className='h-12 w-12 text-emerald-400' />
+									<div className='aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg mb-4 flex items-center justify-center'>
+										{book.image && book.image !== "" ? (
+											<img
+												className='h-full w-full object-cover'
+												src={book.image}
+											/>
+										) : (
+											<BookOpen className='h-12 w-12 text-emerald-400' />
+										)}
 									</div>
 									<div className='space-y-2'>
 										<Badge

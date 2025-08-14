@@ -46,8 +46,7 @@ export default function BookDetailsPage() {
 	const handleBorrow = async () => {
 		if (!book) return;
 		if (!user) {
-			router.push("/login");
-			toast("Please login to borrow a book.");
+			alert("Please login to borrow a book.");
 			return;
 		}
 
@@ -147,10 +146,10 @@ export default function BookDetailsPage() {
 						<CardHeader>
 							<div className='flex items-start justify-between'>
 								<div className='flex-1'>
-									<CardTitle className='md:text-3xl text-xl font-bold text-gray-800 mb-2'>
+									<CardTitle className='md:text-2xl text-lg font-bold text-gray-800 mb-2'>
 										{book.title}
 									</CardTitle>
-									<p className='text-xl text-gray-600'>
+									<p className='text-sm text-gray-600'>
 										by {book.author}
 									</p>
 								</div>
@@ -160,7 +159,7 @@ export default function BookDetailsPage() {
 											? "default"
 											: "secondary"
 									}
-									className={`text-lg px-4 py-2 ${
+									className={`text-sm px-2 py-1 ${
 										book.status === "available"
 											? "bg-emerald-100 text-emerald-800"
 											: "bg-gray-100 text-gray-800"
@@ -172,7 +171,7 @@ export default function BookDetailsPage() {
 						<CardContent>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
 								{/* Book Cover */}
-								<div className='aspect-[3/4] bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center shadow-lg'>
+								<div className='aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center shadow-lg'>
 									{book.image && book.image !== "" ? (
 										<img
 											className='h-full w-full object-cover'
