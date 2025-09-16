@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { Book } from "./my-books/page";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const baseUrl = "https://www.orbtao.com"; // Replace with your actual domain
@@ -112,7 +113,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		if (booksResponse.ok) {
 			const booksData = await booksResponse.json();
 			const bookRoutes: MetadataRoute.Sitemap =
-				booksData.books?.map((book: any) => ({
+				booksData.books?.map((book: Book) => ({
 					url: `${baseUrl}/book/${book._id}`,
 					lastModified: new Date(book.updatedAt || book.createdAt),
 					changeFrequency: "weekly",
